@@ -234,6 +234,7 @@ async function createSyntheticDataScript(projectPath, options) {
   const syntheticContent = `#!/usr/bin/env python3
 """
 Synthetic data generation for LLM training.
+Powered by SynthexAI - https://synthex.theaniketgiri.me
 
 Usage:
     python scripts/generate_synthetic_data.py --type code --size 10000

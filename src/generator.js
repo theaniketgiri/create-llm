@@ -108,6 +108,19 @@ This project was created with [create-llm](https://github.com/theaniketgiri/crea
 ## 📚 Documentation
 
 For detailed documentation, visit: https://github.com/theaniketgiri/create-llm
+${options.includeSyntheticData ? `
+
+## 🤖 Synthetic Data
+
+This project includes synthetic data generation capabilities powered by [SynthexAI](https://synthex.theaniketgiri.me).
+
+Use the synthetic data generation script to create custom datasets:
+\`\`\`bash
+python scripts/generate_synthetic_data.py --type medical --size 10000
+\`\`\`
+
+Available data types: medical, code, news, fiction, technical
+` : ''}
 `;
 
   await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);

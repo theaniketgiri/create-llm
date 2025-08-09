@@ -89,7 +89,7 @@ program
           {
             type: 'confirm',
             name: 'includeSyntheticData',
-            message: 'Would you like to include synthetic data generation capabilities?',
+            message: 'Would you like to include synthetic data generation capabilities powered by SynthexAI?',
             default: true
           }
         ]);
@@ -132,6 +132,12 @@ program
       console.log(chalk.cyan('\n📚 Documentation:'));
       console.log(chalk.white('  Read the README.md file for detailed instructions'));
       console.log(chalk.white('  Visit: https://github.com/theaniketgiri/create-llm'));
+      
+      if (answers.includeSyntheticData) {
+        console.log(chalk.cyan('\n🤖 Synthetic Data:'));
+        console.log(chalk.white('  Synthetic data generation powered by SynthexAI'));
+        console.log(chalk.white('  Visit: https://synthex.theaniketgiri.me'));
+      }
       
       console.log(chalk.green('\n✨ Happy training!'));
       

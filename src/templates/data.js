@@ -238,7 +238,7 @@ def clean_text(text: str) -> str:
     text = re.sub(r'\\s+', ' ', text)
     
     # Remove special characters (keep basic punctuation)
-    text = re.sub(r'[^\\w\\s.,!?;:()\\[\\]{}"\'-]', '', text)
+    text = re.sub(r'[^\\w\\s.,!?;:()\\[\\]{}"\'\\-]', '', text)
     
     # Normalize quotes
     text = text.replace('"', '"').replace('"', '"')
@@ -363,8 +363,16 @@ def preprocess_custom(input_dir: str, output_dir: str):
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
     
-    # Find all text files
-    text_files = list(Path(input_dir).rglob("*.txt"))
+    # Check if input is a file or directory
+    if os.path.isfile(input_dir):
+        # Process single file
+        text_files = [input_dir]
+    elif os.path.isdir(input_dir):
+        # Process directory
+        text_files = list(Path(input_dir).rglob("*.txt"))
+    else:
+        print(f"Input path {input_dir} does not exist")
+        return
     
     if not text_files:
         print(f"No .txt files found in {input_dir}")
@@ -379,7 +387,7 @@ def preprocess_custom(input_dir: str, output_dir: str):
             text = f.read()
         
         # Split into paragraphs
-        paragraphs = text.split('\\n\\n')
+        paragraphs = text.split('\n\n')
         
         for paragraph in paragraphs:
             if paragraph.strip():
@@ -396,13 +404,13 @@ def preprocess_custom(input_dir: str, output_dir: str):
     train_path = os.path.join(output_dir, 'train.txt')
     with open(train_path, 'w', encoding='utf-8') as f:
         for text in train_texts:
-            f.write(text + '\\n\\n')
+            f.write(text + '\n\n')
     
     # Save validation data
     val_path = os.path.join(output_dir, 'validation.txt')
     with open(val_path, 'w', encoding='utf-8') as f:
         for text in val_texts:
-            f.write(text + '\\n\\n')
+            f.write(text + '\n\n')
     
     print(f"Processed {len(train_texts)} training examples")
     print(f"Processed {len(val_texts)} validation examples")
