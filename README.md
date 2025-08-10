@@ -214,6 +214,29 @@ eval_steps: 500
 
 ## 🚀 Training
 
+### Complete Training Workflow
+
+Follow this complete workflow to ensure your model is properly trained:
+
+```bash
+# 1. Download a substantial dataset (if not using your own data)
+python data/download_dataset.py --dataset wikitext
+
+# 2. Train your tokenizer on the raw data
+python tokenizer/train_tokenizer.py --input data/raw.txt --vocab_size 50000
+
+# 3. Preprocess the dataset
+python data/prepare_dataset.py
+
+# 4. Verify your data is properly processed
+head -n 20 data/processed/train.txt
+
+# 5. Start training with proper configuration
+python training/train.py --config training/config.yaml
+```
+
+> **Important:** The default `train.py` script should use the `Trainer` class from `trainer.py`. If your model isn't learning, check that your training script is actually training the model and not just initializing it.
+
 ### Basic Training
 ```bash
 python training/train.py --config training/config.yaml
@@ -237,7 +260,19 @@ tensorboard --logdir logs/
 
 # View logs
 tail -f logs/training.log
+
+# Check training loss trend
+grep "loss" logs/training.log | tail -n 50
 ```
+
+### Verifying Training Progress
+
+To confirm your model is actually training:
+
+1. Check that loss is decreasing over time in logs
+2. Verify model checkpoints are being saved regularly
+3. Test intermediate checkpoints with the generation script
+4. Monitor training metrics in TensorBoard
 
 ## 📈 Evaluation
 
@@ -376,6 +411,156 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [Transformers](https://github.com/huggingface/transformers) - Model architectures
 - [OpenAI](https://openai.com/) - GPT architecture inspiration
 
+## 🔍 Troubleshooting & Debugging
+
+### Common Issues
+
+#### Model Not Generating Meaningful Text
+
+**Symptoms:**
+- Model generates very short or nonsensical responses
+- Output doesn't extend beyond the prompt
+- Text generation stops after a few tokens
+
+**Possible Causes & Solutions:**
+
+1. **Insufficient Training:**
+   - The initial model (`initial_model.pt`) is only initialized and not trained
+   - Solution: Run the full training process with `python training/train.py`
+   - Ensure training completes several epochs (check logs/training.log)
+
+2. **Limited Training Data:**
+   - Check your data files in `data/raw.txt` or `data/processed/train.txt`
+   - Solution: Download a larger dataset using `python data/download_dataset.py`
+   - For WikiText-103: `python data/download_dataset.py --dataset wikitext`
+   - For OpenWebText: Follow instructions in download_dataset.py
+
+3. **Incorrect Training Configuration:**
+   - Check `training/config.yaml` for proper hyperparameters
+   - Ensure `train.py` is using the `Trainer` class from `trainer.py`
+   - Verify that the model is being saved after actual training
+
+4. **Tokenizer Issues:**
+   - Ensure tokenizer is properly trained: `python tokenizer/train_tokenizer.py`
+   - Check if the same tokenizer is used for both training and generation
+
+#### Common Error Messages
+
+**1. "ModuleNotFoundError: No module named 'X'"**
+- **Cause**: Missing Python dependency
+- **Solution**: `pip install -r requirements.txt` or `pip install X`
+
+**2. "CUDA out of memory"**
+- **Cause**: Model or batch size too large for your GPU
+- **Solution**: Reduce `batch_size` or `n_embd` in config.yaml, or enable gradient accumulation
+
+**3. "ValueError: Tokenizer file not found"**
+- **Cause**: Tokenizer not trained or path incorrect
+- **Solution**: Run `python tokenizer/train_tokenizer.py` first
+
+**4. "FileNotFoundError: data/processed/train.txt"**
+- **Cause**: Dataset not preprocessed
+- **Solution**: Run `python data/prepare_dataset.py`
+
+**5. "RuntimeError: Expected tensor for argument #1 'indices' to have scalar type Long"**
+- **Cause**: Data type mismatch, often in tokenized data
+- **Solution**: Check data preprocessing and ensure tokenizer outputs correct types
+
+**6. "ImportError: cannot import name 'X' from 'Y'"**
+- **Cause**: Incorrect project structure or missing implementation
+- **Solution**: Check file structure matches the expected project layout
+
+### Debugging Steps
+
+1. **Verify Data Processing:**
+   ```bash
+   # Check raw data size
+   wc -l data/raw.txt
+   
+   # Check processed data
+   head -n 20 data/processed/train.txt
+   ```
+
+2. **Monitor Training Progress:**
+   ```bash
+   # Check training logs
+   tail -f logs/training.log
+   
+   # Monitor with TensorBoard
+   tensorboard --logdir logs/
+   ```
+
+3. **Inspect Model Checkpoints:**
+   ```bash
+   # List available checkpoints
+   ls -la checkpoints/
+   
+   # Check model info
+   python scripts/model_info.py --model checkpoints/latest.pt
+   ```
+
+4. **Test Generation with Different Parameters:**
+   ```bash
+   # Try different temperature values
+   python eval/generate.py --model checkpoints/latest.pt --prompt "Hello" --temperature 0.7
+   
+   # Try different sampling methods
+   python eval/generate.py --model checkpoints/latest.pt --prompt "Hello" --top_p 0.9 --top_k 40
+   ```
+
+### Environment and Python Path Issues
+
+#### Setting the Python Path
+
+If you encounter import errors when running scripts, you may need to set the Python path to include your project directory:
+
+**Linux/Mac:**
+```bash
+export PYTHONPATH=/path/to/your/project:$PYTHONPATH
+python eval/generate.py --model checkpoints/latest.pt --prompt "Hello"
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:PYTHONPATH="C:\path\to\your\project"; python eval/generate.py --model checkpoints/latest.pt --prompt "Hello"
+```
+
+**Windows (CMD):**
+```cmd
+set PYTHONPATH=C:\path\to\your\project
+python eval/generate.py --model checkpoints/latest.pt --prompt "Hello"
+```
+
+#### Virtual Environment Setup
+
+It's recommended to use a virtual environment to avoid dependency conflicts:
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+#### GPU Setup
+
+To verify your GPU is properly configured for PyTorch:
+
+```python
+# Run this in Python to check GPU availability
+import torch
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"GPU count: {torch.cuda.device_count()}")
+print(f"GPU name: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A'}")
+```
+
 ## 🗺️ Roadmap
 
 - [ ] JAX/Flax backend support
@@ -390,4 +575,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Made with ❤️ by the Create LLM community**
 
-[Star us on GitHub](https://github.com/theaniketgiri/create-llm) | [Follow us on Twitter](https://twitter.com/create_llm) 
+[Star us on GitHub](https://github.com/theaniketgiri/create-llm) | [Follow us on Twitter](https://twitter.com/theaniketgiri)
