@@ -1,6 +1,6 @@
 {
   "name": "create-llm",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Create a custom LLM project from scratch - like create-react-app for language models",
   "main": "index.js",
   "bin": {
