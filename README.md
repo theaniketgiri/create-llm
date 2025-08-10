@@ -14,6 +14,7 @@ Create LLM is a framework that allows any developer or researcher to easily crea
 ## ✨ Features
 
 - **🚀 One-command setup** - Get a complete LLM project in under 5 minutes
+- **🌐 Web GUI Interface** - User-friendly browser interface for training and testing
 - **🏗️ Multiple architectures** - GPT, Mistral, RWKV, Mixtral support
 - **🔤 Custom tokenizers** - BPE, WordPiece, Unigram training
 - **📊 Built-in datasets** - WikiText, C4, OpenWebText support
@@ -21,18 +22,39 @@ Create LLM is a framework that allows any developer or researcher to easily crea
 - **📈 Comprehensive evaluation** - Perplexity, accuracy, BLEU, ROUGE metrics
 - **🎨 Synthetic data generation** - Generate training data programmatically
 - **📝 Interactive generation** - Chat with your trained model
+- **📱 Real-time monitoring** - Live training progress and logs
+- **🎯 Drag & drop training** - Upload files and start training with clicks
 
 ## 🚀 Quick Start
 
-### Install
+### Option 1: Web GUI (Recommended for Beginners)
 
+1. **Install the framework**:
 ```bash
 npm install -g create-llm
 ```
 
-### Create a new LLM project
+2. **Create a new LLM project**:
+```bash
+npx create-llm my-awesome-llm
+```
+
+3. **Start the Web GUI**:
+```bash
+cd my-awesome-llm
+cd ../web-gui
+pip install -r requirements.txt
+python app.py
+```
+
+4. **Open your browser** and go to `http://localhost:5000`
+
+5. **Upload your training data** and start training with just a few clicks!
+
+### Option 2: Command Line Interface
 
 ```bash
+npm install -g create-llm
 npx create-llm my-awesome-llm
 ```
 
