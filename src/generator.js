@@ -22,7 +22,8 @@ async function generateProject(projectName, options) {
     'eval',
     'checkpoints',
     'logs',
-    'scripts'
+    'scripts',
+    'web-gui'
   ];
   
   for (const dir of dirs) {
@@ -36,6 +37,9 @@ async function generateProject(projectName, options) {
   await createTrainingFiles(projectPath, options);
   await createEvalFiles(projectPath, options);
   await createConfigFiles(projectPath, options);
+  
+  // Create Web GUI
+  await createWebGUI(projectPath, options);
   
   // Create README
   await createREADME(projectPath, projectName, options);
@@ -75,6 +79,14 @@ A custom Large Language Model built with create-llm.
    python eval/run_eval.py
    \`\`\`
 
+6. **Launch Web GUI** (Optional)
+   \`\`\`bash
+   cd web-gui
+   npm install
+   npm start
+   \`\`\`
+   Then open http://localhost:3001 in your browser
+
 ## 📁 Project Structure
 
 - \`model/\` - Transformer architecture (${options.template.toUpperCase()})
@@ -84,6 +96,7 @@ A custom Large Language Model built with create-llm.
 - \`eval/\` - Evaluation scripts and metrics
 - \`checkpoints/\` - Saved model checkpoints
 - \`logs/\` - Training logs and metrics
+- \`web-gui/\` - Web-based training and testing interface
 
 ## ⚙️ Configuration
 
@@ -95,8 +108,19 @@ Edit \`training/config.yaml\` to customize:
 
 ## 📊 Monitoring
 
-Training progress is logged to \`logs/\` directory. Use TensorBoard to visualize:
+Training progress is logged to \`logs/\` directory. You can monitor training in two ways:
 
+### Web GUI (Recommended)
+Launch the web interface for real-time training monitoring:
+\`\`\`bash
+cd web-gui
+npm install
+npm start
+\`\`\`
+Then open http://localhost:3001 in your browser
+
+### TensorBoard
+Use TensorBoard for detailed metrics visualization:
 \`\`\`bash
 tensorboard --logdir logs/
 \`\`\`
@@ -124,6 +148,30 @@ Available data types: medical, code, news, fiction, technical
 `;
 
   await fs.writeFile(path.join(projectPath, 'README.md'), readmeContent);
+}
+
+async function createWebGUI(projectPath, options) {
+  // Copy web GUI files
+  const guiSourcePath = path.join(__dirname, '..', 'web-gui');
+  const guiDestPath = path.join(projectPath, 'web-gui');
+  
+  try {
+    console.log(`📁 Copying GUI from: ${guiSourcePath}`);
+    console.log(`📁 Copying GUI to: ${guiDestPath}`);
+    
+    // Check if source exists
+    const sourceExists = await fs.pathExists(guiSourcePath);
+    if (!sourceExists) {
+      console.log('❌ Web GUI source directory does not exist');
+      return;
+    }
+    
+    await fs.copy(guiSourcePath, guiDestPath);
+    console.log('✅ Web GUI files copied successfully');
+  } catch (error) {
+    console.log('⚠️  Could not copy web GUI files:', error.message);
+    console.log('Error details:', error);
+  }
 }
 
 module.exports = { generateProject }; 

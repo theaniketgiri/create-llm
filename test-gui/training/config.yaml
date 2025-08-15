@@ -1,0 +1,52 @@
+# Model architecture
+n_embd: 768
+n_layer: 12
+n_head: 12
+
+# Training hyperparameters
+batch_size: 8
+learning_rate: 3e-4
+weight_decay: 0.01
+warmup_steps: 1000
+max_steps: 100000
+gradient_accumulation_steps: 1
+max_grad_norm: 1.0
+
+# Data
+max_length: 1024
+train_data_path: "data/processed/train.txt"
+val_data_path: "data/processed/validation.txt"
+test_data_path: "data/processed/test.txt"
+tokenizer_path: "tokenizer/tokenizer.json"
+num_workers: 4
+streaming: false
+
+# Optimization
+optimizer: "adamw"
+scheduler: "cosine"
+lr_schedule: "warmup_cosine"
+
+# Checkpointing
+save_dir: "checkpoints"
+save_steps: 1000
+eval_steps: 500
+log_steps: 100
+
+# Logging
+log_dir: "logs"
+tensorboard: true
+wandb: false
+wandb_project: "llm-training"
+
+# Early stopping
+early_stopping: true
+patience: 5
+min_delta: 0.001
+
+# Mixed precision
+fp16: true
+bf16: false
+
+# Distributed training
+distributed: false
+local_rank: -1

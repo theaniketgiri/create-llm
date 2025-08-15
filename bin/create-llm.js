@@ -118,6 +118,7 @@ program
       console.log(chalk.gray('  ├── eval/                # Evaluation scripts'));
       console.log(chalk.gray('  ├── checkpoints/         # Model checkpoints'));
       console.log(chalk.gray('  ├── logs/                # Training logs'));
+      console.log(chalk.gray('  ├── web-gui/             # Web-based training interface'));
       console.log(chalk.gray('  └── README.md            # Project documentation'));
       
       console.log(chalk.cyan('\n🚀 Next steps:'));
@@ -128,6 +129,8 @@ program
       console.log(chalk.white('  python tokenizer/train_tokenizer.py --input data/raw.txt'));
       console.log(chalk.white('  python data/prepare_dataset.py'));
       console.log(chalk.white('  python training/train.py --config training/config.yaml'));
+      console.log(chalk.white('  # Optional: Launch web GUI for training monitoring'));
+      console.log(chalk.white('  cd web-gui && npm install && npm start'));
       
       console.log(chalk.cyan('\n📚 Documentation:'));
       console.log(chalk.white('  Read the README.md file for detailed instructions'));

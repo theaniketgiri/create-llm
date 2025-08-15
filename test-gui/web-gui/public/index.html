@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Training & Testing GUI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .training-progress {
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-brain text-3xl"></i>
+                    <h1 class="text-2xl font-bold">LLM Training & Testing GUI</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="status-indicator" class="px-3 py-1 rounded-full text-sm font-medium bg-green-500">
+                        <i class="fas fa-circle mr-2"></i>Ready
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Project Status -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover transition-all duration-300">
+                <div class="flex items-center">
+                    <i class="fas fa-file-code text-blue-500 text-2xl mr-4"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Tokenizer</h3>
+                        <p id="tokenizer-status" class="text-sm text-gray-600">Not trained</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover transition-all duration-300">
+                <div class="flex items-center">
+                    <i class="fas fa-database text-green-500 text-2xl mr-4"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Dataset</h3>
+                        <p id="dataset-status" class="text-sm text-gray-600">Not prepared</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover transition-all duration-300">
+                <div class="flex items-center">
+                    <i class="fas fa-cogs text-purple-500 text-2xl mr-4"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Model</h3>
+                        <p id="model-status" class="text-sm text-gray-600">Not trained</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover transition-all duration-300">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-orange-500 text-2xl mr-4"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Training</h3>
+                        <p id="training-status" class="text-sm text-gray-600">Idle</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6">
+                    <button onclick="showTab('training')" class="tab-btn active py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+                        <i class="fas fa-play mr-2"></i>Training
+                    </button>
+                    <button onclick="showTab('testing')" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                        <i class="fas fa-comments mr-2"></i>Testing
+                    </button>
+                    <button onclick="showTab('config')" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                        <i class="fas fa-cog mr-2"></i>Configuration
+                    </button>
+                    <button onclick="showTab('data')" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                        <i class="fas fa-upload mr-2"></i>Data
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Training Tab -->
+            <div id="training-tab" class="tab-content p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Training Controls -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Training Controls</h3>
+                        
+                        <div class="space-y-4">
+                            <button id="start-training" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-play mr-2"></i>Start Training
+                            </button>
+                            
+                            <button id="stop-training" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200" disabled>
+                                <i class="fas fa-stop mr-2"></i>Stop Training
+                            </button>
+                        </div>
+
+                        <!-- Training Progress -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Training Progress</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Epoch</span>
+                                        <span id="current-epoch">0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="epoch-progress" class="training-progress h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Loss</span>
+                                        <span id="current-loss">0.000</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="loss-progress" class="bg-red-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Logs -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Training Logs</h3>
+                        <div class="bg-gray-900 text-green-400 p-4 rounded-lg h-96 overflow-y-auto font-mono text-sm">
+                            <div id="training-logs">
+                                <div class="text-gray-500">Training logs will appear here...</div>
+                            </div>
+                        </div>
+                        <button id="clear-logs" class="mt-2 text-gray-500 hover:text-gray-700 text-sm">
+                            <i class="fas fa-trash mr-1"></i>Clear Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testing Tab -->
+            <div id="testing-tab" class="tab-content p-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Chat Interface -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Chat with Your LLM</h3>
+                        <div class="bg-gray-50 rounded-lg p-4 h-96 flex flex-col">
+                            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 mb-4">
+                                <div class="text-gray-500 text-center py-8">Start a conversation with your trained model...</div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <input type="text" id="chat-input" placeholder="Type your message..." 
+                                       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button id="send-message" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Selection -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Model Settings</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Model Checkpoint</label>
+                                <select id="model-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">No models available</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Temperature</label>
+                                <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" 
+                                       class="w-full">
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>0.0 (Deterministic)</span>
+                                    <span id="temp-value">0.7</span>
+                                    <span>2.0 (Creative)</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Max Length</label>
+                                <input type="number" id="max-length" value="100" min="10" max="1000" 
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Tab -->
+            <div id="config-tab" class="tab-content p-6 hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Training Configuration</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Learning Rate</label>
+                        <input type="text" id="learning-rate" value="3e-4" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Batch Size</label>
+                        <input type="number" id="batch-size" value="8" min="1" max="64" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Steps</label>
+                        <input type="number" id="max-steps" value="100000" min="1000" max="1000000" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model Size (n_embd)</label>
+                        <input type="number" id="n-embd" value="768" min="256" max="4096" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Layers</label>
+                        <input type="number" id="n-layer" value="12" min="1" max="48" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Heads</label>
+                        <input type="number" id="n-head" value="12" min="1" max="64" 
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <button id="save-config" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-save mr-2"></i>Save Configuration
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Tab -->
+            <div id="data-tab" class="tab-content p-6 hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Dataset Management</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Upload Data -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-4">Upload Training Data</h4>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600 mb-4">Drag and drop your text files here, or click to browse</p>
+                            <input type="file" id="file-upload" accept=".txt,.json,.csv" multiple class="hidden">
+                            <button onclick="document.getElementById('file-upload').click()" 
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                                Choose Files
+                            </button>
+                        </div>
+                        <div id="upload-progress" class="mt-4 hidden">
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div id="upload-bar" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <p id="upload-status" class="text-sm text-gray-600 mt-2">Uploading...</p>
+                        </div>
+                    </div>
+
+                    <!-- Data Preview -->
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-4">Data Preview</h4>
+                        <div class="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto">
+                            <div id="data-preview" class="text-gray-500">
+                                No data uploaded yet...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
