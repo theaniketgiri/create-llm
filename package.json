@@ -1,0 +1,63 @@
+{
+  "name": "@theanikrtgiri/create-llm",
+  "version": "1.0.1",
+  "description": "The fastest way to start training your own Language Model. Create production-ready LLM training projects in seconds.",
+  "main": "dist/index.js",
+  "bin": {
+    "create-llm": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node dist/index.js test-project --template nano",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "llm",
+    "language-model",
+    "machine-learning",
+    "deep-learning",
+    "pytorch",
+    "gpt",
+    "transformer",
+    "training",
+    "cli",
+    "scaffold",
+    "generator",
+    "nlp",
+    "ai",
+    "artificial-intelligence"
+  ],
+  "author": "Aniket Giri <theaniketgiri@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theaniketgiri/create-llm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/theaniketgiri/create-llm/issues"
+  },
+  "homepage": "https://github.com/theaniketgiri/create-llm#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}
