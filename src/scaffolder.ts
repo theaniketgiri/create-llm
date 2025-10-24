@@ -10,241 +10,242 @@ import { ConfigGenerator } from './config-generator';
  * ScaffolderEngine creates the project structure and files
  */
 export class ScaffolderEngine {
-  private projectPath: string;
-  private spinner: Ora;
+    private projectPath: string;
+    private spinner: Ora;
 
-  constructor(projectPath: string) {
-    this.projectPath = projectPath;
-    this.spinner = ora();
-  }
-
-  /**
-   * Create complete project structure
-   */
-  async createProjectStructure(config: ProjectConfig, template: Template): Promise<void> {
-    this.spinner.start('Creating project structure...');
-
-    try {
-      // Create root directory
-      this.createDirectory(this.projectPath);
-
-      // Create directory structure
-      this.createDirectories();
-
-      this.spinner.succeed(chalk.green('Project structure created'));
-    } catch (error) {
-      this.spinner.fail(chalk.red('Failed to create project structure'));
-      throw error;
+    constructor(projectPath: string) {
+        this.projectPath = projectPath;
+        this.spinner = ora();
     }
-  }
 
-  /**
-   * Create all necessary directories
-   */
-  private createDirectories(): void {
-    const directories = [
-      'data',
-      'data/raw',
-      'data/processed',
-      'models',
-      'models/architectures',
-      'tokenizer',
-      'training',
-      'training/callbacks',
-      'training/dashboard',
-      'training/dashboard/templates',
-      'evaluation',
-      'checkpoints',
-      'logs',
-      'plugins',
-      'utils',
-      'tests'
-    ];
+    /**
+     * Create complete project structure
+     */
+    async createProjectStructure(config: ProjectConfig, template: Template): Promise<void> {
+        this.spinner.start('Creating project structure...');
 
-    for (const dir of directories) {
-      this.createDirectory(path.join(this.projectPath, dir));
+        try {
+            // Create root directory
+            this.createDirectory(this.projectPath);
+
+            // Create directory structure
+            this.createDirectories();
+
+            this.spinner.succeed(chalk.green('Project structure created'));
+        } catch (error) {
+            this.spinner.fail(chalk.red('Failed to create project structure'));
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Create a directory if it doesn't exist
-   */
-  private createDirectory(dirPath: string): void {
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    /**
+     * Create all necessary directories
+     */
+    private createDirectories(): void {
+        const directories = [
+            'data',
+            'data/raw',
+            'data/processed',
+            'models',
+            'models/architectures',
+            'tokenizer',
+            'training',
+            'training/callbacks',
+            'training/dashboard',
+            'training/dashboard/templates',
+            'evaluation',
+            'checkpoints',
+            'logs',
+            'plugins',
+            'utils',
+            'tests'
+        ];
+
+        for (const dir of directories) {
+            this.createDirectory(path.join(this.projectPath, dir));
+        }
     }
-  }
 
-  /**
-   * Create a file with content
-   */
-  private createFile(filePath: string, content: string): void {
-    const fullPath = path.join(this.projectPath, filePath);
-    const dir = path.dirname(fullPath);
-    
-    // Ensure directory exists
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    /**
+     * Create a directory if it doesn't exist
+     */
+    private createDirectory(dirPath: string): void {
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
     }
-    
-    fs.writeFileSync(fullPath, content, 'utf-8');
-  }
 
-  /**
-   * Copy template files to project
-   */
-  async copyTemplateFiles(config: ProjectConfig, template: Template): Promise<void> {
-    this.spinner.start('Generating project files...');
+    /**
+     * Create a file with content
+     */
+    private createFile(filePath: string, content: string): void {
+        const fullPath = path.join(this.projectPath, filePath);
+        const dir = path.dirname(fullPath);
 
-    try {
-      // Generate Python files
-      this.generatePythonFiles(config, template);
+        // Ensure directory exists
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
 
-      // Generate configuration files
-      this.generateConfigFiles(config, template);
-
-      // Generate documentation
-      this.generateDocumentation(config, template);
-
-      this.spinner.succeed(chalk.green('Project files generated'));
-    } catch (error) {
-      this.spinner.fail(chalk.red('Failed to generate project files'));
-      throw error;
+        fs.writeFileSync(fullPath, content, 'utf-8');
     }
-  }
 
-  /**
-   * Generate Python project files
-   */
-  private generatePythonFiles(config: ProjectConfig, template: Template): void {
-    // Import Python templates
-    const { PythonTemplates } = require('./python-templates');
-    const { PythonDatasetTemplates } = require('./python-dataset-templates');
-    const { PythonCallbackTemplates } = require('./python-callback-templates');
-    const { PythonTrainerTemplates } = require('./python-trainer-templates');
-    const { PythonDashboardTemplates } = require('./python-dashboard-templates');
+    /**
+     * Copy template files to project
+     */
+    async copyTemplateFiles(config: ProjectConfig, template: Template): Promise<void> {
+        this.spinner.start('Generating project files...');
 
-    const { PythonPluginTemplates } = require('./python-plugin-templates');
-    const { PythonErrorTemplates } = require('./python-error-templates');
+        try {
+            // Generate Python files
+            this.generatePythonFiles(config, template);
 
-    // Create __init__.py files
-    this.createFile('models/__init__.py', PythonTemplates.getModelsInit());
-    this.createFile('models/architectures/__init__.py', PythonTemplates.getArchitecturesInit());
-    this.createFile('data/__init__.py', PythonDatasetTemplates.getDataInit());
-    this.createFile('training/__init__.py', PythonTrainerTemplates.getTrainingInit());
-    this.createFile('training/callbacks/__init__.py', PythonCallbackTemplates.getCallbacksInit());
-    this.createFile('training/dashboard/__init__.py', PythonDashboardTemplates.getDashboardInit());
-    this.createFile('evaluation/__init__.py', '');
-    this.createFile('plugins/__init__.py', PythonPluginTemplates.getPluginsInit());
-    this.createFile('utils/__init__.py', PythonErrorTemplates.getErrorInit());
+            // Generate configuration files
+            this.generateConfigFiles(config, template);
 
-    // Create model architecture files
-    this.createFile('models/architectures/gpt.py', PythonTemplates.getGPTArchitecture());
-    this.createFile('models/architectures/tiny.py', PythonTemplates.getTinyModel());
-    this.createFile('models/architectures/small.py', PythonTemplates.getSmallModel());
-    this.createFile('models/architectures/base.py', PythonTemplates.getBaseModel());
-    this.createFile('models/config.py', PythonTemplates.getModelConfig());
+            // Generate documentation
+            this.generateDocumentation(config, template);
 
-    // Create dataset files
-    this.createFile('data/dataset.py', PythonDatasetTemplates.getLLMDataset());
+            this.spinner.succeed(chalk.green('Project files generated'));
+        } catch (error) {
+            this.spinner.fail(chalk.red('Failed to generate project files'));
+            throw error;
+        }
+    }
 
-    // Create callback files
-    this.createFile('training/callbacks/base.py', PythonCallbackTemplates.getBaseCallback());
-    this.createFile('training/callbacks/checkpoint.py', PythonCallbackTemplates.getCheckpointCallback());
-    this.createFile('training/callbacks/logging.py', PythonCallbackTemplates.getLoggingCallback());
-    this.createFile('training/callbacks/checkpoint_manager.py', PythonCallbackTemplates.getCheckpointManager());
+    /**
+     * Generate Python project files
+     */
+    private generatePythonFiles(config: ProjectConfig, template: Template): void {
+        // Import Python templates
+        const { PythonTemplates } = require('./python-templates');
+        const { PythonDatasetTemplates } = require('./python-dataset-templates');
+        const { PythonCallbackTemplates } = require('./python-callback-templates');
+        const { PythonTrainerTemplates } = require('./python-trainer-templates');
+        const { PythonDashboardTemplates } = require('./python-dashboard-templates');
 
-    // Create dashboard files
-    this.createFile('training/dashboard/dashboard_server.py', PythonDashboardTemplates.getDashboardServer());
-    this.createFile('training/dashboard/dashboard_callback.py', PythonDashboardTemplates.getDashboardCallback());
-    this.createFile('training/dashboard/templates/dashboard.html', PythonDashboardTemplates.getDashboardHTML());
+        const { PythonPluginTemplates } = require('./python-plugin-templates');
+        const { PythonErrorTemplates } = require('./python-error-templates');
 
-    // Create plugin files
-    this.createFile('plugins/base.py', PythonPluginTemplates.getPluginBase());
-    this.createFile('plugins/plugin_manager.py', PythonPluginTemplates.getPluginManager());
-    this.createFile('plugins/example_plugin.py', PythonPluginTemplates.getExamplePlugin());
-    this.createFile('plugins/README.md', PythonPluginTemplates.getPluginsReadme());
-    
-    // Create built-in plugin files
-    this.createFile('plugins/wandb_plugin.py', PythonPluginTemplates.getWandBPlugin());
-    this.createFile('plugins/huggingface_plugin.py', PythonPluginTemplates.getHuggingFacePlugin());
+        // Create __init__.py files
+        this.createFile('models/__init__.py', PythonTemplates.getModelsInit());
+        this.createFile('models/architectures/__init__.py', PythonTemplates.getArchitecturesInit());
+        this.createFile('data/__init__.py', PythonDatasetTemplates.getDataInit());
+        this.createFile('training/__init__.py', PythonTrainerTemplates.getTrainingInit());
+        this.createFile('training/callbacks/__init__.py', PythonCallbackTemplates.getCallbacksInit());
+        this.createFile('training/dashboard/__init__.py', PythonDashboardTemplates.getDashboardInit());
+        this.createFile('evaluation/__init__.py', '');
+        this.createFile('plugins/__init__.py', PythonPluginTemplates.getPluginsInit());
+        this.createFile('utils/__init__.py', PythonErrorTemplates.getErrorInit());
 
-    // Create error handling files
-    this.createFile('utils/exceptions.py', PythonErrorTemplates.getCustomExceptions());
-    this.createFile('utils/handlers.py', PythonErrorTemplates.getErrorHandlers());
+        // Create model architecture files
+        this.createFile('models/architectures/gpt.py', PythonTemplates.getGPTArchitecture());
+        this.createFile('models/architectures/nano.py', PythonTemplates.getNanoModel());
+        this.createFile('models/architectures/tiny.py', PythonTemplates.getTinyModel());
+        this.createFile('models/architectures/small.py', PythonTemplates.getSmallModel());
+        this.createFile('models/architectures/base.py', PythonTemplates.getBaseModel());
+        this.createFile('models/config.py', PythonTemplates.getModelConfig());
 
-    // Create test files
-    const { PythonTestTemplates } = require('./python-test-templates');
-    this.createFile('pytest.ini', PythonTestTemplates.getPytestConfig());
-    this.createFile('tests/conftest.py', PythonTestTemplates.getConftest());
-    this.createFile('tests/test_models.py', PythonTestTemplates.getModelTests());
-    this.createFile('tests/test_config.py', PythonTestTemplates.getConfigTests());
-    this.createFile('tests/test_errors.py', PythonTestTemplates.getErrorTests());
-    this.createFile('tests/test_integration.py', PythonTestTemplates.getIntegrationTests());
-    this.createFile('tests/README.md', PythonTestTemplates.getTestsReadme());
+        // Create dataset files
+        this.createFile('data/dataset.py', PythonDatasetTemplates.getLLMDataset());
 
-    // Create trainer file
-    this.createFile('training/trainer.py', PythonTrainerTemplates.getTrainer());
+        // Create callback files
+        this.createFile('training/callbacks/base.py', PythonCallbackTemplates.getBaseCallback());
+        this.createFile('training/callbacks/checkpoint.py', PythonCallbackTemplates.getCheckpointCallback());
+        this.createFile('training/callbacks/logging.py', PythonCallbackTemplates.getLoggingCallback());
+        this.createFile('training/callbacks/checkpoint_manager.py', PythonCallbackTemplates.getCheckpointManager());
 
-    // Create placeholder Python files
-    this.createFile('data/prepare.py', this.getDataPrepareTemplate());
-    this.createFile('tokenizer/train.py', this.getTokenizerTrainTemplate());
-    this.createFile('training/train.py', this.getTrainingScriptTemplate());
-    this.createFile('evaluation/evaluate.py', this.getEvaluationScriptTemplate());
-    this.createFile('evaluation/generate.py', this.getGenerationScriptTemplate());
-    this.createFile('chat.py', this.getChatScriptTemplate());
-    this.createFile('deploy.py', this.getDeployScriptTemplate());
-    this.createFile('compare.py', this.getCompareScriptTemplate());
-  }
+        // Create dashboard files
+        this.createFile('training/dashboard/dashboard_server.py', PythonDashboardTemplates.getDashboardServer());
+        this.createFile('training/dashboard/dashboard_callback.py', PythonDashboardTemplates.getDashboardCallback());
+        this.createFile('training/dashboard/templates/dashboard.html', PythonDashboardTemplates.getDashboardHTML());
 
-  /**
-   * Generate configuration files
-   */
-  private generateConfigFiles(config: ProjectConfig, template: Template): void {
-    // Generate llm.config.js
-    const configGenerator = new ConfigGenerator();
-    const configContent = configGenerator.generateConfigWithTips(config, template);
-    this.createFile('llm.config.js', configContent);
+        // Create plugin files
+        this.createFile('plugins/base.py', PythonPluginTemplates.getPluginBase());
+        this.createFile('plugins/plugin_manager.py', PythonPluginTemplates.getPluginManager());
+        this.createFile('plugins/example_plugin.py', PythonPluginTemplates.getExamplePlugin());
+        this.createFile('plugins/README.md', PythonPluginTemplates.getPluginsReadme());
 
-    // Generate requirements.txt
-    this.createFile('requirements.txt', this.getRequirementsTxt(config));
+        // Create built-in plugin files
+        this.createFile('plugins/wandb_plugin.py', PythonPluginTemplates.getWandBPlugin());
+        this.createFile('plugins/huggingface_plugin.py', PythonPluginTemplates.getHuggingFacePlugin());
 
-    // Generate .gitignore
-    this.createFile('.gitignore', this.getGitignore());
+        // Create error handling files
+        this.createFile('utils/exceptions.py', PythonErrorTemplates.getCustomExceptions());
+        this.createFile('utils/handlers.py', PythonErrorTemplates.getErrorHandlers());
 
-    // Generate sample data file
-    this.createFile('data/raw/sample.txt', this.getSampleData(template));
-  }
+        // Create test files
+        const { PythonTestTemplates } = require('./python-test-templates');
+        this.createFile('pytest.ini', PythonTestTemplates.getPytestConfig());
+        this.createFile('tests/conftest.py', PythonTestTemplates.getConftest());
+        this.createFile('tests/test_models.py', PythonTestTemplates.getModelTests());
+        this.createFile('tests/test_config.py', PythonTestTemplates.getConfigTests());
+        this.createFile('tests/test_errors.py', PythonTestTemplates.getErrorTests());
+        this.createFile('tests/test_integration.py', PythonTestTemplates.getIntegrationTests());
+        this.createFile('tests/README.md', PythonTestTemplates.getTestsReadme());
 
-  /**
-   * Generate documentation files
-   */
-  private generateDocumentation(config: ProjectConfig, template: Template): void {
-    // Generate README.md
-    this.createFile('README.md', this.getReadmeTemplate(config, template));
-  }
+        // Create trainer file
+        this.createFile('training/trainer.py', PythonTrainerTemplates.getTrainer());
 
-  /**
-   * Display progress with spinner
-   */
-  displayProgress(message: string): void {
-    this.spinner.text = message;
-  }
+        // Create placeholder Python files
+        this.createFile('data/prepare.py', this.getDataPrepareTemplate());
+        this.createFile('tokenizer/train.py', this.getTokenizerTrainTemplate());
+        this.createFile('training/train.py', this.getTrainingScriptTemplate());
+        this.createFile('evaluation/evaluate.py', this.getEvaluationScriptTemplate());
+        this.createFile('evaluation/generate.py', this.getGenerationScriptTemplate());
+        this.createFile('chat.py', this.getChatScriptTemplate());
+        this.createFile('deploy.py', this.getDeployScriptTemplate());
+        this.createFile('compare.py', this.getCompareScriptTemplate());
+    }
 
-  // Template getters
+    /**
+     * Generate configuration files
+     */
+    private generateConfigFiles(config: ProjectConfig, template: Template): void {
+        // Generate llm.config.js
+        const configGenerator = new ConfigGenerator();
+        const configContent = configGenerator.generateConfigWithTips(config, template);
+        this.createFile('llm.config.js', configContent);
 
-  private getDataPrepareTemplate(): string {
-    const { PythonDataTemplates } = require('./python-tokenizer-templates');
-    return PythonDataTemplates.getDataPrepareScript();
-  }
+        // Generate requirements.txt
+        this.createFile('requirements.txt', this.getRequirementsTxt(config));
 
-  private getTokenizerTrainTemplate(): string {
-    const { PythonTokenizerTemplates } = require('./python-tokenizer-templates');
-    return PythonTokenizerTemplates.getTokenizerTrainScript();
-  }
+        // Generate .gitignore
+        this.createFile('.gitignore', this.getGitignore());
 
-  private getTrainingScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+        // Generate sample data file
+        this.createFile('data/raw/sample.txt', this.getSampleData(template));
+    }
+
+    /**
+     * Generate documentation files
+     */
+    private generateDocumentation(config: ProjectConfig, template: Template): void {
+        // Generate README.md
+        this.createFile('README.md', this.getReadmeTemplate(config, template));
+    }
+
+    /**
+     * Display progress with spinner
+     */
+    displayProgress(message: string): void {
+        this.spinner.text = message;
+    }
+
+    // Template getters
+
+    private getDataPrepareTemplate(): string {
+        const { PythonDataTemplates } = require('./python-tokenizer-templates');
+        return PythonDataTemplates.getDataPrepareScript();
+    }
+
+    private getTokenizerTrainTemplate(): string {
+        const { PythonTokenizerTemplates } = require('./python-tokenizer-templates');
+        return PythonTokenizerTemplates.getTokenizerTrainScript();
+    }
+
+    private getTrainingScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Main training script
@@ -510,10 +511,10 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
+    }
 
-  private getEvaluationScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+    private getEvaluationScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 """
 Model evaluation script
 Evaluates trained model on validation set with perplexity and metrics
@@ -744,10 +745,10 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
+    }
 
-  private getGenerationScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+    private getGenerationScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 """
 Text generation script
 Generates text using trained model with various sampling strategies
@@ -1037,10 +1038,10 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
+    }
 
-  private getChatScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+    private getChatScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 """
 Interactive chat interface
 Chat with your trained LLM model in the terminal
@@ -1503,10 +1504,10 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
+    }
 
-  private getDeployScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+    private getDeployScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 """
 Model Deployment Script
 Deploy trained models to various platforms (Hugging Face Hub, Replicate, etc.)
@@ -1728,7 +1729,7 @@ tags:
 
 # {repo_id.split('/')[-1]}
 
-This model was trained using [create-llm](https://github.com/yourusername/create-llm).
+This model was trained using [create-llm](https://github.com/theaniketgiri/create-llm).
 
 ## Model Description
 
@@ -1934,10 +1935,10 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
+    }
 
-  private getCompareScriptTemplate(): string {
-    return `#!/usr/bin/env python3
+    private getCompareScriptTemplate(): string {
+        return `#!/usr/bin/env python3
 """
 Model Comparison Tool
 Compare multiple model checkpoints side-by-side on the same validation set
@@ -2401,81 +2402,81 @@ def main():
 if __name__ == '__main__':
     main()
 `;
-  }
-
-  private getRequirementsTxt(config: ProjectConfig): string {
-    const lines: string[] = [];
-    
-    lines.push('# LLM Training Project Dependencies');
-    lines.push(`# Generated by create-llm for ${config.template} template`);
-    lines.push('');
-    lines.push('# Core deep learning framework');
-    lines.push('torch>=2.0.0');
-    lines.push('');
-    lines.push('# Transformers and tokenizers');
-    lines.push('transformers>=4.30.0');
-    lines.push('tokenizers>=0.13.0');
-    lines.push('');
-    lines.push('# Training utilities');
-    lines.push('tqdm>=4.65.0');
-    lines.push('numpy>=1.24.0');
-    lines.push('tabulate>=0.9.0');
-    lines.push('');
-    lines.push('# Data processing');
-    lines.push('datasets>=2.14.0');
-    lines.push('');
-    lines.push('# Visualization and logging');
-    lines.push('tensorboard>=2.13.0');
-    lines.push('matplotlib>=3.7.0');
-    lines.push('');
-    lines.push('# Live training dashboard');
-    lines.push('flask>=2.3.0');
-    lines.push('flask-socketio>=5.3.0');
-    lines.push('');
-    
-    // Add plugin-specific dependencies
-    if (config.plugins.includes('wandb')) {
-      lines.push('# Experiment tracking (WandB plugin enabled)');
-      lines.push('wandb>=0.15.0');
-      lines.push('');
-    } else {
-      lines.push('# Optional: Experiment tracking');
-      lines.push('# wandb>=0.15.0');
-      lines.push('');
     }
-    
-    if (config.plugins.includes('huggingface')) {
-      lines.push('# Model hub integration (HuggingFace plugin enabled)');
-      lines.push('huggingface-hub>=0.16.0');
-      lines.push('');
-    } else {
-      lines.push('# Optional: Model hub integration');
-      lines.push('# huggingface-hub>=0.16.0');
-      lines.push('');
-    }
-    
-    if (config.plugins.includes('synthex')) {
-      lines.push('# Synthetic data generation (Synthex plugin enabled)');
-      lines.push('# synthex-ai>=1.0.0  # Install from synthex.ai');
-      lines.push('');
-    }
-    
 
-    lines.push('# Optional: Advanced optimizations');
-    lines.push('# flash-attn>=2.0.0  # Faster attention (requires CUDA)');
-    lines.push('# deepspeed>=0.10.0  # Distributed training');
-    lines.push('');
-    lines.push('# Development and testing tools');
-    lines.push('pytest>=7.4.0');
-    lines.push('pytest-cov>=4.1.0');
-    lines.push('# black>=23.7.0');
-    lines.push('# flake8>=6.1.0');
-    
-    return lines.join('\n') + '\n';
-  }
+    private getRequirementsTxt(config: ProjectConfig): string {
+        const lines: string[] = [];
 
-  private getGitignore(): string {
-    return `# Python
+        lines.push('# LLM Training Project Dependencies');
+        lines.push(`# Generated by create-llm for ${config.template} template`);
+        lines.push('');
+        lines.push('# Core deep learning framework');
+        lines.push('torch>=2.0.0');
+        lines.push('');
+        lines.push('# Transformers and tokenizers');
+        lines.push('transformers>=4.30.0');
+        lines.push('tokenizers>=0.13.0');
+        lines.push('');
+        lines.push('# Training utilities');
+        lines.push('tqdm>=4.65.0');
+        lines.push('numpy>=1.24.0');
+        lines.push('tabulate>=0.9.0');
+        lines.push('');
+        lines.push('# Data processing');
+        lines.push('datasets>=2.14.0');
+        lines.push('');
+        lines.push('# Visualization and logging');
+        lines.push('tensorboard>=2.13.0');
+        lines.push('matplotlib>=3.7.0');
+        lines.push('');
+        lines.push('# Live training dashboard');
+        lines.push('flask>=2.3.0');
+        lines.push('flask-socketio>=5.3.0');
+        lines.push('');
+
+        // Add plugin-specific dependencies
+        if (config.plugins.includes('wandb')) {
+            lines.push('# Experiment tracking (WandB plugin enabled)');
+            lines.push('wandb>=0.15.0');
+            lines.push('');
+        } else {
+            lines.push('# Optional: Experiment tracking');
+            lines.push('# wandb>=0.15.0');
+            lines.push('');
+        }
+
+        if (config.plugins.includes('huggingface')) {
+            lines.push('# Model hub integration (HuggingFace plugin enabled)');
+            lines.push('huggingface-hub>=0.16.0');
+            lines.push('');
+        } else {
+            lines.push('# Optional: Model hub integration');
+            lines.push('# huggingface-hub>=0.16.0');
+            lines.push('');
+        }
+
+        if (config.plugins.includes('synthex')) {
+            lines.push('# Synthetic data generation (Synthex plugin enabled)');
+            lines.push('# synthex-ai>=1.0.0  # Install from synthex.ai');
+            lines.push('');
+        }
+
+
+        lines.push('# Optional: Advanced optimizations');
+        lines.push('# flash-attn>=2.0.0  # Faster attention (requires CUDA)');
+        lines.push('# deepspeed>=0.10.0  # Distributed training');
+        lines.push('');
+        lines.push('# Development and testing tools');
+        lines.push('pytest>=7.4.0');
+        lines.push('pytest-cov>=4.1.0');
+        lines.push('# black>=23.7.0');
+        lines.push('# flake8>=6.1.0');
+
+        return lines.join('\n') + '\n';
+    }
+
+    private getGitignore(): string {
+        return `# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -2578,13 +2579,13 @@ coverage.xml
 .dmypy.json
 dmypy.json
 `;
-  }
+    }
 
-  private getSampleData(template: Template): string {
-    const minDataSize = template.config.hardware.can_run_on_cpu ? '1-10MB' : 
-                       template.config.model.parameters < 500_000_000 ? '100MB-1GB' : '1GB+';
-    
-    return `# Sample Training Data
+    private getSampleData(template: Template): string {
+        const minDataSize = template.config.hardware.can_run_on_cpu ? '1-10MB' :
+            template.config.model.parameters < 500_000_000 ? '100MB-1GB' : '1GB+';
+
+        return `# Sample Training Data
 
 This is sample training data for your LLM project. Replace this with your own data to train a custom language model.
 
@@ -2705,106 +2706,259 @@ For more detailed information, see the README.md file in the project root.
 
 Good luck with your language model training!
 `;
-  }
+    }
 
-  private getReadmeTemplate(config: ProjectConfig, template: Template): string {
-    const params = (template.config.model.parameters / 1_000_000).toFixed(0);
-    const hardware = template.config.hardware.recommended_gpu;
-    const trainingTime = template.config.hardware.estimated_training_time;
-    const cpuFriendly = template.config.hardware.can_run_on_cpu;
+    private getReadmeTemplate(config: ProjectConfig, template: Template): string {
+        const params = (template.config.model.parameters / 1_000_000).toFixed(1);
+        const hardware = template.config.hardware.recommended_gpu;
+        const trainingTime = template.config.hardware.estimated_training_time;
+        const cpuFriendly = template.config.hardware.can_run_on_cpu;
+        const minData = config.template === 'nano' ? '100+' : 
+                       config.template === 'tiny' ? '1,000+' :
+                       config.template === 'small' ? '10,000+' : '100,000+';
 
-    return `# ${config.projectName}
+        return `# ${config.projectName}
 
-LLM training project created with create-llm
+> ${template.config.documentation.description}
 
-## Project Details
+Created with [create-llm](https://github.com/theaniketgiri/create-llm) ✨
 
-- **Template**: ${config.template.toUpperCase()}
-- **Model**: ${template.config.model.type.toUpperCase()} (${params}M parameters)
-- **Tokenizer**: ${config.tokenizer.toUpperCase()}
-- **Hardware**: ${hardware}
-- **Training Time**: ${trainingTime}
-- **CPU Compatible**: ${cpuFriendly ? 'Yes' : 'No'}
+---
 
-## Quick Start
+## 📋 Project Overview
 
-### 1. Install Dependencies
+| Property | Value |
+|----------|-------|
+| **Template** | ${config.template.toUpperCase()} |
+| **Model** | ${template.config.model.type.toUpperCase()} (~${params}M parameters) |
+| **Tokenizer** | ${config.tokenizer.toUpperCase()} |
+| **Hardware** | ${hardware} |
+| **Training Time** | ${trainingTime} |
+| **Min Data** | ${minData} examples |
+| **CPU Compatible** | ${cpuFriendly ? '✅ Yes' : '❌ No (GPU required)'} |
+
+---
+
+## 🚀 Quick Start
+
+### Step 1: Install Dependencies
 
 \`\`\`bash
 pip install -r requirements.txt
 \`\`\`
 
-### 2. Prepare Your Data
+### Step 2: Add Your Training Data
 
-Place your training data (text files) in \`data/raw/\`, then run:
+Place your text files in \`data/raw/\`:
+
+\`\`\`bash
+# Example: Download Shakespeare
+curl https://www.gutenberg.org/files/100/100-0.txt > data/raw/shakespeare.txt
+
+# Or copy your own files
+cp /path/to/your/data.txt data/raw/
+\`\`\`
+
+**Data Requirements:**
+- Format: Plain text (.txt files)
+- Encoding: UTF-8
+- Minimum: ${minData} examples
+- Recommended: Clean, well-formatted text
+
+### Step 3: Train Tokenizer
+
+\`\`\`bash
+python tokenizer/train.py --data data/raw/
+\`\`\`
+
+This creates a vocabulary from your data. You'll see:
+- Vocabulary size
+- Sample encoding
+- Tokenizer statistics
+
+### Step 4: Prepare Dataset
 
 \`\`\`bash
 python data/prepare.py
 \`\`\`
 
-### 3. Train Tokenizer
+This tokenizes and prepares your data. You'll see:
+- Number of training examples
+- Number of validation examples
+- Total tokens processed
+
+### Step 5: Start Training
 
 \`\`\`bash
-python tokenizer/train.py --data data/raw/sample.txt
-\`\`\`
-
-### 4. Start Training
-
-\`\`\`bash
+# Basic training
 python training/train.py
+
+# With live dashboard (recommended)
+python training/train.py --dashboard
+# Then open http://localhost:5000 in your browser
 \`\`\`
 
-## Project Structure
+**Training will show:**
+- Real-time loss
+- Learning rate schedule
+- Tokens per second
+- Estimated time remaining
+
+### Step 6: Monitor Training
+
+Watch for these indicators:
+
+✅ **Good Training:**
+- Loss steadily decreasing
+- Perplexity: 5-20 (depends on data)
+- No warnings
+
+⚠️ **Potential Issues:**
+- Perplexity < 1.5: Possible overfitting
+- Loss not decreasing: Check learning rate
+- "Model too large" warning: Add more data or use smaller template
+
+### Step 7: Evaluate Your Model
+
+\`\`\`bash
+python evaluation/evaluate.py --checkpoint checkpoints/checkpoint-best.pt
+\`\`\`
+
+You'll see:
+- Perplexity score
+- Loss metrics
+- Performance statistics
+
+### Step 8: Generate Text
+
+\`\`\`bash
+python evaluation/generate.py \\
+  --checkpoint checkpoints/checkpoint-best.pt \\
+  --prompt "Once upon a time" \\
+  --temperature 0.8
+\`\`\`
+
+**Temperature Guide:**
+- 0.1-0.3: Focused, deterministic
+- 0.7-0.9: Balanced, creative
+- 1.0-1.5: Very creative, diverse
+
+### Step 9: Interactive Chat
+
+\`\`\`bash
+python chat.py --checkpoint checkpoints/checkpoint-best.pt
+\`\`\`
+
+**Chat Commands:**
+- \`/temp <value>\`: Adjust temperature
+- \`/clear\`: Clear conversation
+- \`/quit\`: Exit chat
+
+---
+
+## 📁 Project Structure
 
 \`\`\`
 ${config.projectName}/
-├── data/
-│   ├── raw/              # Place your training data here
-│   ├── processed/        # Processed data (generated)
-│   └── prepare.py        # Data preprocessing script
-├── models/
-│   ├── architectures/    # Model architectures
-│   └── config.py         # Model configuration
-├── tokenizer/
-│   ├── train.py          # Tokenizer training script
-│   └── tokenizer.json    # Trained tokenizer (generated)
-├── training/
-│   ├── train.py          # Main training script
-│   ├── trainer.py        # Trainer class
-│   └── callbacks/        # Training callbacks
-├── evaluation/
-│   ├── evaluate.py       # Model evaluation
-│   └── generate.py       # Text generation
-├── checkpoints/          # Model checkpoints (generated)
-├── logs/                 # Training logs (generated)
-├── llm.config.js         # Configuration file
-├── chat.py               # Interactive chat
-├── deploy.py             # Deployment script
-└── README.md             # This file
+│
+├── 📂 data/
+│   ├── raw/                    # ← Put your .txt files here
+│   ├── processed/              # Tokenized data (auto-generated)
+│   ├── dataset.py              # PyTorch dataset classes
+│   └── prepare.py              # Data preprocessing script
+│
+├── 📂 models/
+│   ├── architectures/
+│   │   ├── gpt.py             # GPT architecture implementation
+│   │   ├── nano.py            # 1M parameter model
+│   │   ├── tiny.py            # 6M parameter model
+│   │   ├── small.py           # 100M parameter model
+│   │   └── base.py            # 1B parameter model
+│   ├── __init__.py
+│   └── config.py              # Configuration loader
+│
+├── 📂 tokenizer/
+│   ├── train.py               # Tokenizer training script
+│   └── tokenizer.json         # Trained tokenizer (auto-generated)
+│
+├── 📂 training/
+│   ├── train.py               # Main training script ⭐
+│   ├── trainer.py             # Trainer class
+│   ├── callbacks/             # Training callbacks
+│   │   ├── base.py
+│   │   ├── checkpoint.py      # Checkpoint management
+│   │   ├── logging.py         # TensorBoard logging
+│   │   └── checkpoint_manager.py
+│   └── dashboard/             # Live training dashboard
+│       ├── dashboard_server.py
+│       └── templates/
+│
+├── 📂 evaluation/
+│   ├── evaluate.py            # Model evaluation
+│   └── generate.py            # Text generation
+│
+├── 📂 plugins/                # Optional integrations
+│   ├── wandb_plugin.py        # Weights & Biases
+│   ├── huggingface_plugin.py  # HuggingFace Hub
+│   └── synthex_plugin.py      # Synthetic data
+│
+├── 📂 checkpoints/            # Saved models (auto-generated)
+├── 📂 logs/                   # Training logs (auto-generated)
+│
+├── 📄 llm.config.js           # Main configuration ⚙️
+├── 📄 requirements.txt        # Python dependencies
+├── 📄 chat.py                 # Interactive chat interface
+├── 📄 deploy.py               # Deployment script
+├── 📄 compare.py              # Model comparison tool
+└── 📄 README.md               # This file
 \`\`\`
 
-## Configuration
+---
 
-Edit \`llm.config.js\` to customize:
-- Model architecture
-- Training hyperparameters
-- Data processing settings
-- Tokenizer configuration
-- Plugins and integrations
+## ⚙️ Configuration
 
-## Training Tips
+All settings are in \`llm.config.js\`:
+
+\`\`\`javascript
+module.exports = {
+  model: {
+    type: '${template.config.model.type}',
+    size: '${config.template}',
+    vocab_size: ${template.config.model.vocab_size},  // Auto-detected from tokenizer
+    max_length: ${template.config.model.max_length},
+    layers: ${template.config.model.layers},
+    heads: ${template.config.model.heads},
+    dim: ${template.config.model.dim},
+    dropout: ${template.config.model.dropout},
+  },
+  training: {
+    batch_size: ${template.config.training.batch_size},
+    learning_rate: ${template.config.training.learning_rate},
+    max_steps: ${template.config.training.max_steps},
+    // ... more options
+  },
+};
+\`\`\`
+
+**Common Adjustments:**
+- \`batch_size\`: Reduce if out of memory
+- \`learning_rate\`: Adjust if loss unstable
+- \`dropout\`: Increase if overfitting (0.2-0.4)
+- \`max_steps\`: Increase for better quality
+
+---
+
+## 💡 Training Tips
 
 ${template.config.documentation.training_tips.map(tip => `- ${tip}`).join('\n')}
 
-## Hardware Requirements
+---
 
-- **Minimum RAM**: ${template.config.hardware.min_ram}
-- **Recommended GPU**: ${hardware}
-- **Estimated Training Time**: ${trainingTime}
-
-## Advanced Usage
+## 🔧 Advanced Usage
 
 ### Resume Training
+
+If training was interrupted:
 
 \`\`\`bash
 python training/train.py --resume checkpoints/checkpoint-1000.pt
@@ -2812,58 +2966,135 @@ python training/train.py --resume checkpoints/checkpoint-1000.pt
 
 ### Live Dashboard
 
+Monitor training in real-time:
+
 \`\`\`bash
 python training/train.py --dashboard
 \`\`\`
 
-### Evaluate Model
+Then open http://localhost:5000 to see:
+- Real-time loss curves
+- Learning rate schedule
+- GPU memory usage
+- Tokens per second
+- Recent checkpoints
+
+### Model Comparison
+
+Compare multiple trained models:
 
 \`\`\`bash
-python evaluation/evaluate.py --checkpoint checkpoints/final.pt
+python compare.py checkpoints/model-v1/ checkpoints/model-v2/
 \`\`\`
 
-### Generate Text
+Shows:
+- Side-by-side metrics
+- Sample generations
+- Performance comparison
+
+### Custom Generation
 
 \`\`\`bash
-python evaluation/generate.py --checkpoint checkpoints/final.pt --prompt "Once upon a time"
+# Adjust creativity
+python evaluation/generate.py \\
+  --checkpoint checkpoints/checkpoint-best.pt \\
+  --prompt "Your prompt" \\
+  --temperature 0.8 \\
+  --top-k 50 \\
+  --top-p 0.95 \\
+  --max-length 200
 \`\`\`
 
-### Interactive Chat
+### Deploy to Hugging Face
 
 \`\`\`bash
-python chat.py --checkpoint checkpoints/final.pt
+python deploy.py \\
+  --checkpoint checkpoints/checkpoint-best.pt \\
+  --to huggingface \\
+  --repo-id username/my-model
 \`\`\`
 
-### Deploy Model
+---
 
-\`\`\`bash
-# Deploy to Hugging Face
-python deploy.py --checkpoint checkpoints/final.pt --to huggingface
+## 🔌 Plugins
 
-# Deploy to Replicate
-python deploy.py --checkpoint checkpoints/final.pt --to replicate
-\`\`\`
+${config.plugins.length > 0 ? `### Enabled Plugins\n\n${config.plugins.map(p => `- **${p}**: Configured and ready to use`).join('\n')}` : '### No Plugins Enabled\n\nTo enable plugins, edit \`llm.config.js\`:\n\n\`\`\`javascript\nplugins: [\n  \'wandb\',        // Experiment tracking\n  \'huggingface\',  // Model sharing\n  \'synthex\',      // Synthetic data\n]\n\`\`\`'}
 
-## Plugins
+---
 
-${config.plugins.length > 0 ? `Enabled plugins:\n${config.plugins.map(p => `- ${p}`).join('\n')}` : 'No plugins enabled'}
+## 🐛 Troubleshooting
 
-To enable plugins, edit \`llm.config.js\` and add them to the \`plugins\` array.
+### "Vocab size mismatch detected"
+✅ **This is normal!** The tool auto-detects and uses the correct vocab size from your tokenizer.
 
-## Documentation
+### "Model may be too large for dataset"
+⚠️ **Warning:** Risk of overfitting
+- **Solution 1:** Add more training data (recommended)
+- **Solution 2:** Use smaller template (nano/tiny)
+- **Solution 3:** Increase dropout in llm.config.js
 
-For more information, visit:
-- [create-llm Documentation](https://github.com/yourusername/create-llm)
-- [Training Guide](https://github.com/yourusername/create-llm/docs/training.md)
-- [API Reference](https://github.com/yourusername/create-llm/docs/api.md)
+### "Perplexity < 1.5"
+❌ **Overfitting detected**
+- Model memorized the data
+- Add much more data or use smaller model
 
-## License
+### "CUDA out of memory"
+- Reduce \`batch_size\` in llm.config.js
+- Enable \`mixed_precision: true\`
+- Increase \`gradient_accumulation_steps\`
+
+### "Training loss not decreasing"
+- Check learning rate (try 1e-4 to 1e-3)
+- Verify data loaded correctly
+- Try longer warmup period
+
+### "Tokenizer not found"
+- Run \`python tokenizer/train.py --data data/raw/\` first
+- Make sure data/raw/ contains .txt files
+
+---
+
+## 📊 Hardware Requirements
+
+| Component | Requirement |
+|-----------|-------------|
+| **RAM** | ${template.config.hardware.min_ram} minimum |
+| **GPU** | ${hardware} |
+| **Storage** | 10GB+ free space |
+| **Training Time** | ${trainingTime} |
+
+---
+
+## 📚 Resources
+
+- [create-llm Documentation](https://github.com/theaniketgiri/create-llm)
+- [Training Best Practices](https://github.com/theaniketgiri/create-llm/docs/training.md)
+- [API Reference](https://github.com/theaniketgiri/create-llm/docs/api.md)
+- [Troubleshooting Guide](https://github.com/theaniketgiri/create-llm/docs/troubleshooting.md)
+
+---
+
+## 📝 License
 
 MIT
 
-## Created with create-llm
+---
 
-This project was scaffolded with [create-llm](https://github.com/yourusername/create-llm) - A CLI tool for scaffolding LLM training projects.
+## 🙏 Acknowledgments
+
+This project was created with [create-llm](https://github.com/theaniketgiri/create-llm) - The fastest way to start training your own Language Model.
+
+**Built with:**
+- PyTorch
+- Transformers
+- Tokenizers
+- TensorBoard
+
+---
+
+**Happy Training! 🚀**
+
+If you encounter any issues, please check the troubleshooting section above or visit the [create-llm repository](https://github.com/theaniketgiri/create-llm/issues).
 `;
-  }
+    }
 }

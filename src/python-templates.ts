@@ -263,12 +263,62 @@ if __name__ == '__main__':
   }
 
   /**
-   * Get tiny model template (10M parameters)
+   * Get nano model template (500K parameters)
+   */
+  static getNanoModel(): string {
+    return `"""
+Nano GPT model (500K parameters)
+Perfect for learning and quick testing
+"""
+
+from .gpt import create_gpt_model
+
+
+def create_nano_model(model_config=None):
+    """
+    Create nano GPT model with 500K parameters
+    
+    Architecture:
+    - 3 layers
+    - 4 attention heads
+    - 128 hidden dimension
+    - 5K vocabulary (or actual vocab size from tokenizer)
+    - 256 max sequence length
+    
+    Hardware Requirements:
+    - Any CPU
+    - 2GB RAM minimum
+    - Training time: 1-2 minutes
+    """
+    config = {
+        'vocab_size': 5000,
+        'max_length': 256,
+        'layers': 3,
+        'heads': 4,
+        'dim': 128,
+        'dropout': 0.1,
+    }
+    
+    # Override with provided config (e.g., actual vocab size)
+    if model_config:
+        config.update(model_config)
+    
+    return create_gpt_model(config)
+
+
+if __name__ == '__main__':
+    model = create_nano_model()
+    print(f"Nano model created with {model.count_parameters():,} parameters")
+`;
+  }
+
+  /**
+   * Get tiny model template (5M parameters)
    */
   static getTinyModel(): string {
     return `"""
-Tiny GPT model (10M parameters)
-Optimized for CPU training and quick experimentation
+Tiny GPT model (5M parameters)
+Optimized for prototyping and small projects
 """
 
 from .gpt import create_gpt_model
@@ -276,27 +326,27 @@ from .gpt import create_gpt_model
 
 def create_tiny_model(model_config=None):
     """
-    Create tiny GPT model with 10M parameters
+    Create tiny GPT model with 5M parameters
     
     Architecture:
-    - 6 layers
-    - 6 attention heads
-    - 384 hidden dimension
-    - 32K vocabulary (or actual vocab size from tokenizer)
+    - 4 layers
+    - 4 attention heads
+    - 256 hidden dimension
+    - 10K vocabulary (or actual vocab size from tokenizer)
     - 512 max sequence length
     
     Hardware Requirements:
-    - CPU-friendly
+    - CPU or basic GPU
     - 4GB RAM minimum
-    - Training time: 10-30 minutes
+    - Training time: 5-15 minutes
     """
     config = {
-        'vocab_size': 32000,
+        'vocab_size': 10000,
         'max_length': 512,
-        'layers': 6,
-        'heads': 6,
-        'dim': 384,
-        'dropout': 0.1,
+        'layers': 4,
+        'heads': 4,
+        'dim': 256,
+        'dropout': 0.2,
     }
     
     # Override with provided config (e.g., actual vocab size)
@@ -716,7 +766,7 @@ class ConfigLoader:
 
 def load_model_from_config(config_path: str = 'llm.config.js'):
     """Load model based on config file"""
-    from .architectures import tiny, small, base, gpt
+    from .architectures import nano, tiny, small, base, gpt
     import json
     from pathlib import Path
     
@@ -746,7 +796,9 @@ def load_model_from_config(config_path: str = 'llm.config.js'):
     size = model_config.get('size', 'small')
     
     # Create model based on size
-    if size == 'tiny':
+    if size == 'nano':
+        return nano.create_nano_model(model_config)
+    elif size == 'tiny':
         return tiny.create_tiny_model(model_config)
     elif size == 'small':
         return small.create_small_model(model_config)
@@ -781,6 +833,7 @@ Model architectures package
 """
 
 from .gpt import GPTModel, GPTConfig, create_gpt_model
+from .nano import create_nano_model
 from .tiny import create_tiny_model
 from .small import create_small_model
 from .base import create_base_model
@@ -789,6 +842,7 @@ __all__ = [
     'GPTModel',
     'GPTConfig',
     'create_gpt_model',
+    'create_nano_model',
     'create_tiny_model',
     'create_small_model',
     'create_base_model',

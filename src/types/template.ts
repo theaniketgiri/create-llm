@@ -56,7 +56,7 @@ export interface TemplateDocumentation {
 }
 
 export interface Template {
-  name: 'tiny' | 'small' | 'base' | 'custom';
+  name: 'nano' | 'tiny' | 'small' | 'base' | 'custom';
   config: {
     model: ModelConfig;
     training: TrainingConfig;

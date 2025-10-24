@@ -65,9 +65,9 @@ export class TemplateManager {
    */
   private validateTemplate(template: Template): void {
     // Validate template name
-    if (!template.name || !['tiny', 'small', 'base', 'custom'].includes(template.name)) {
+    if (!template.name || !['nano', 'tiny', 'small', 'base', 'custom'].includes(template.name)) {
       throw new TemplateValidationError(
-        `Invalid template name: ${template.name}. Must be one of: tiny, small, base, custom`
+        `Invalid template name: ${template.name}. Must be one of: nano, tiny, small, base, custom`
       );
     }
 

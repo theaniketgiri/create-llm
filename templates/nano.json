@@ -5,7 +5,7 @@
       "type": "gpt",
       "parameters": 500000,
       "layers": 3,
-      "heads": 3,
+      "heads": 4,
       "dim": 128,
       "vocab_size": 5000,
       "max_length": 256,
