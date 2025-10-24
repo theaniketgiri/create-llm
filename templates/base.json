@@ -1,0 +1,64 @@
+{
+  "name": "base",
+  "config": {
+    "model": {
+      "type": "gpt",
+      "parameters": 1000000000,
+      "layers": 24,
+      "heads": 16,
+      "dim": 1536,
+      "vocab_size": 50000,
+      "max_length": 2048,
+      "dropout": 0.1
+    },
+    "training": {
+      "batch_size": 64,
+      "learning_rate": 0.0002,
+      "warmup_steps": 5000,
+      "max_steps": 500000,
+      "eval_interval": 2000,
+      "save_interval": 10000,
+      "optimizer": "adamw",
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "mixed_precision": true,
+      "gradient_accumulation_steps": 4
+    },
+    "data": {
+      "max_length": 2048,
+      "stride": 1024,
+      "val_split": 0.05,
+      "shuffle": true
+    },
+    "tokenizer": {
+      "type": "bpe",
+      "vocab_size": 50000,
+      "min_frequency": 2,
+      "special_tokens": ["<pad>", "<unk>", "<s>", "</s>"]
+    },
+    "hardware": {
+      "min_ram": "64GB",
+      "recommended_gpu": "NVIDIA A100 (40GB) or 2x RTX 4090",
+      "estimated_training_time": "1-3 days",
+      "can_run_on_cpu": false
+    },
+    "documentation": {
+      "description": "A 1B parameter model for serious LLM training with multi-GPU support",
+      "use_cases": [
+        "High-quality language models",
+        "Research and experimentation",
+        "Large-scale text generation",
+        "Foundation models for fine-tuning"
+      ],
+      "hardware_notes": "Requires high-end GPU(s) with 40GB+ VRAM total. Training takes 1-3 days on A100 or multi-GPU setup.",
+      "training_tips": [
+        "Use multi-GPU training for faster results",
+        "Requires large datasets (1GB+ of text)",
+        "Monitor GPU memory usage carefully",
+        "Use gradient checkpointing if memory is tight",
+        "Consider using DeepSpeed or FSDP for optimization",
+        "Plan for longer training times and higher costs"
+      ]
+    }
+  }
+}

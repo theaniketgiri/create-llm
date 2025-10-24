@@ -1,0 +1,65 @@
+{
+  "name": "nano",
+  "config": {
+    "model": {
+      "type": "gpt",
+      "parameters": 500000,
+      "layers": 3,
+      "heads": 3,
+      "dim": 128,
+      "vocab_size": 5000,
+      "max_length": 256,
+      "dropout": 0.1
+    },
+    "training": {
+      "batch_size": 8,
+      "learning_rate": 0.0005,
+      "warmup_steps": 100,
+      "max_steps": 1000,
+      "eval_interval": 200,
+      "save_interval": 500,
+      "optimizer": "adamw",
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "mixed_precision": false,
+      "gradient_accumulation_steps": 1
+    },
+    "data": {
+      "max_length": 256,
+      "stride": 128,
+      "val_split": 0.1,
+      "shuffle": true
+    },
+    "tokenizer": {
+      "type": "bpe",
+      "vocab_size": 5000,
+      "min_frequency": 2,
+      "special_tokens": ["<pad>", "<unk>", "<s>", "</s>"]
+    },
+    "hardware": {
+      "min_ram": "2GB",
+      "recommended_gpu": "None (CPU-friendly)",
+      "estimated_training_time": "1-2 minutes",
+      "can_run_on_cpu": true
+    },
+    "documentation": {
+      "description": "A nano 500K parameter model perfect for learning, testing, and 'hello world' experiments",
+      "use_cases": [
+        "Learning LLM training basics",
+        "Quick testing and experimentation",
+        "Educational demos",
+        "Minimal resource environments",
+        "Understanding model architecture"
+      ],
+      "hardware_notes": "Runs on any laptop CPU with 2GB RAM. Training completes in 1-2 minutes. Perfect for learning without GPU.",
+      "training_tips": [
+        "Perfect for your first LLM training experience",
+        "Requires only 100+ examples to avoid overfitting",
+        "Great for testing tokenizers and data pipelines",
+        "Use this to learn before scaling up",
+        "Trains in under 2 minutes on any CPU",
+        "Ideal for educational purposes and demos"
+      ]
+    }
+  }
+}

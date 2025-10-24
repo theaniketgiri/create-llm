@@ -1,0 +1,64 @@
+{
+  "name": "custom",
+  "config": {
+    "model": {
+      "type": "gpt",
+      "parameters": 50000000,
+      "layers": 8,
+      "heads": 8,
+      "dim": 512,
+      "vocab_size": 32000,
+      "max_length": 1024,
+      "dropout": 0.1
+    },
+    "training": {
+      "batch_size": 32,
+      "learning_rate": 0.0003,
+      "warmup_steps": 1000,
+      "max_steps": 50000,
+      "eval_interval": 1000,
+      "save_interval": 5000,
+      "optimizer": "adamw",
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "mixed_precision": true,
+      "gradient_accumulation_steps": 1
+    },
+    "data": {
+      "max_length": 1024,
+      "stride": 512,
+      "val_split": 0.1,
+      "shuffle": true
+    },
+    "tokenizer": {
+      "type": "bpe",
+      "vocab_size": 32000,
+      "min_frequency": 2,
+      "special_tokens": ["<pad>", "<unk>", "<s>", "</s>"]
+    },
+    "hardware": {
+      "min_ram": "8GB",
+      "recommended_gpu": "NVIDIA GTX 1080 Ti or better",
+      "estimated_training_time": "Varies based on configuration",
+      "can_run_on_cpu": false
+    },
+    "documentation": {
+      "description": "A fully customizable template as a starting point for your own architecture",
+      "use_cases": [
+        "Custom model architectures",
+        "Experimentation with hyperparameters",
+        "Specialized use cases",
+        "Research projects"
+      ],
+      "hardware_notes": "Hardware requirements vary based on your customizations. Start with these defaults and adjust as needed.",
+      "training_tips": [
+        "This template provides sensible defaults you can modify",
+        "Edit llm.config.js to customize all parameters",
+        "Start with smaller values and scale up gradually",
+        "Monitor memory usage when changing model size",
+        "Test your configuration on a small dataset first",
+        "Document your changes for reproducibility"
+      ]
+    }
+  }
+}

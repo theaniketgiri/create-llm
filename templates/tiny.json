@@ -1,0 +1,64 @@
+{
+  "name": "tiny",
+  "config": {
+    "model": {
+      "type": "gpt",
+      "parameters": 5000000,
+      "layers": 4,
+      "heads": 4,
+      "dim": 256,
+      "vocab_size": 10000,
+      "max_length": 512,
+      "dropout": 0.2
+    },
+    "training": {
+      "batch_size": 16,
+      "learning_rate": 0.0006,
+      "warmup_steps": 500,
+      "max_steps": 10000,
+      "eval_interval": 500,
+      "save_interval": 2000,
+      "optimizer": "adamw",
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "mixed_precision": false,
+      "gradient_accumulation_steps": 1
+    },
+    "data": {
+      "max_length": 512,
+      "stride": 256,
+      "val_split": 0.1,
+      "shuffle": true
+    },
+    "tokenizer": {
+      "type": "bpe",
+      "vocab_size": 10000,
+      "min_frequency": 2,
+      "special_tokens": ["<pad>", "<unk>", "<s>", "</s>"]
+    },
+    "hardware": {
+      "min_ram": "4GB",
+      "recommended_gpu": "None (CPU-friendly)",
+      "estimated_training_time": "10-30 minutes",
+      "can_run_on_cpu": true
+    },
+    "documentation": {
+      "description": "A tiny 5M parameter model for prototyping and small projects on CPU or basic GPU",
+      "use_cases": [
+        "Small-scale projects and prototypes",
+        "Testing with limited data (1K-10K examples)",
+        "CPU or basic GPU training",
+        "Personal projects and experiments"
+      ],
+      "hardware_notes": "Runs on laptop CPU or basic GPU with 4GB RAM. Training completes in 5-15 minutes.",
+      "training_tips": [
+        "Good balance between size and capability",
+        "Requires 1,000+ examples to avoid overfitting",
+        "Can handle small to medium datasets (1-50MB)",
+        "Use for prototyping before scaling to SMALL",
+        "Watch for overfitting: if perplexity < 1.5, add more data",
+        "Recommended: 5,000+ training examples for best results"
+      ]
+    }
+  }
+}

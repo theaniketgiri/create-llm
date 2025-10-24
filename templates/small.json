@@ -1,0 +1,63 @@
+{
+  "name": "small",
+  "config": {
+    "model": {
+      "type": "gpt",
+      "parameters": 100000000,
+      "layers": 12,
+      "heads": 12,
+      "dim": 768,
+      "vocab_size": 32000,
+      "max_length": 1024,
+      "dropout": 0.1
+    },
+    "training": {
+      "batch_size": 32,
+      "learning_rate": 0.0003,
+      "warmup_steps": 2000,
+      "max_steps": 100000,
+      "eval_interval": 1000,
+      "save_interval": 5000,
+      "optimizer": "adamw",
+      "weight_decay": 0.01,
+      "gradient_clip": 1.0,
+      "mixed_precision": true,
+      "gradient_accumulation_steps": 2
+    },
+    "data": {
+      "max_length": 1024,
+      "stride": 512,
+      "val_split": 0.1,
+      "shuffle": true
+    },
+    "tokenizer": {
+      "type": "bpe",
+      "vocab_size": 32000,
+      "min_frequency": 2,
+      "special_tokens": ["<pad>", "<unk>", "<s>", "</s>"]
+    },
+    "hardware": {
+      "min_ram": "16GB",
+      "recommended_gpu": "NVIDIA RTX 3060 (12GB) or better",
+      "estimated_training_time": "2-6 hours",
+      "can_run_on_cpu": false
+    },
+    "documentation": {
+      "description": "A 100M parameter model optimized for single GPU training with good performance",
+      "use_cases": [
+        "Domain-specific language models",
+        "Text generation tasks",
+        "Fine-tuning for specific applications",
+        "Production-ready small models"
+      ],
+      "hardware_notes": "Requires a GPU with at least 12GB VRAM. Training takes 2-6 hours on an RTX 3060 or similar GPU.",
+      "training_tips": [
+        "Recommended for most production use cases",
+        "Good balance between quality and training time",
+        "Works well with datasets of 100MB-1GB",
+        "Enable mixed precision training to reduce memory usage",
+        "Consider gradient accumulation if running out of memory"
+      ]
+    }
+  }
+}
