@@ -115,7 +115,7 @@ function displayNextSteps(config: ProjectConfig, template: Template): void {
   console.log(chalk.white('  • README:            ') + chalk.gray(`./${projectName}/README.md`));
   console.log(chalk.white('  • Config Guide:      ') + chalk.gray('llm.config.js (with inline comments)'));
   console.log(chalk.white('  • Plugin Docs:       ') + chalk.gray('plugins/README.md'));
-  console.log(chalk.white('  • GitHub:            ') + chalk.blue.underline('https://github.com/yourusername/create-llm'));
+  console.log(chalk.white('  • GitHub:            ') + chalk.blue.underline('https://github.com/theaniketgiri/create-llm'));
   
   // Hardware Requirements
   if (template.config.hardware.min_ram || template.config.hardware.recommended_gpu) {

@@ -285,7 +285,7 @@ Any other relevant information.
 
 - 💬 [Discord Community](https://discord.gg/create-llm)
 - 📧 [Email](mailto:support@create-llm.dev)
-- 🐛 [GitHub Issues](https://github.com/yourusername/create-llm/issues)
+- 🐛 [GitHub Issues](https://github.com/theaniketgiri/create-llm/issues)
 
 ## License
 

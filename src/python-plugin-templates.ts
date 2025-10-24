@@ -933,7 +933,7 @@ tags:
 
 # {self.repo_id.split('/')[-1]}
 
-This model was trained using [create-llm](https://github.com/yourusername/create-llm).
+This model was trained using [create-llm](https://github.com/theaniketgiri/create-llm).
 
 ## Model Details
 
@@ -1016,7 +1016,7 @@ tags:
 
 # {self.repo_id.split('/')[-1]}
 
-This model was trained using [create-llm](https://github.com/yourusername/create-llm).
+This model was trained using [create-llm](https://github.com/theaniketgiri/create-llm).
 
 ## Model Details
 

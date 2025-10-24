@@ -91,4 +91,4 @@ The first production-ready release of create-llm!
 
 ---
 
-For more details, see the [full commit history](https://github.com/yourusername/create-llm/commits/main).
+For more details, see the [full commit history](https://github.com/theaniketgiri/create-llm/commits/main).
