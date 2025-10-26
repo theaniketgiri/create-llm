@@ -408,7 +408,7 @@ Plugin Interface
 ## Deployment
 
 ### NPM Package
-- Scoped package: `@theaniketgiri/create-llm`
+- Scoped package: `@theaniketgiri/create-llm` || `create-llm`
 - Binary: `create-llm`
 - Auto-build on publish
 - Semantic versioning
