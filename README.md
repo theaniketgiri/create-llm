@@ -71,10 +71,12 @@ Everything you need out of the box:
 ### 📊 **Smart Defaults**
 Intelligent configuration that:
 - Auto-detects vocab size from tokenizer
+- Automatically handles sequence length mismatches
 - Warns about model/data size mismatches
 - Detects overfitting during training
 - Suggests optimal hyperparameters
 - Handles cross-platform paths
+- Provides detailed diagnostic messages for errors
 
 ### 🎨 **Plugin System**
 Optional integrations:
@@ -606,6 +608,13 @@ class MyPlugin(BasePlugin):
 **"Vocab size mismatch detected"**
 - ✅ This is normal! The tool auto-detects and fixes it
 - The model will use the actual tokenizer vocab size
+
+**"Position embedding index error" or sequences too long**
+- ✅ Automatically handled! Sequences exceeding max_length are truncated
+- The model logs warnings when truncation occurs
+- Check your data preprocessing if you see frequent truncation warnings
+- Consider increasing `max_length` in config if you need longer sequences
+- Note: Increasing max_length requires retraining from scratch
 
 **"Model may be too large for dataset"**
 - ⚠️ Warning: Risk of overfitting

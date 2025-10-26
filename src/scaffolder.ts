@@ -545,6 +545,14 @@ class Evaluator:
         self.device = device
         self.model.to(device)
         self.model.eval()
+        
+        # Log model configuration for diagnostics
+        if hasattr(model, 'config'):
+            print(f"Model Configuration:")
+            print(f"  max_length: {model.config.max_length}")
+            print(f"  vocab_size: {model.config.vocab_size}")
+            if hasattr(model, 'position_embedding'):
+                print(f"  Position embedding size: {model.position_embedding.num_embeddings}")
     
     @torch.no_grad()
     def evaluate(self, dataloader):
@@ -656,6 +664,17 @@ def load_checkpoint(checkpoint_path: str, device: str):
     print(f"✓ Model loaded from step {checkpoint['step']}")
     print(f"  Training loss: {checkpoint['loss']:.4f}")
     
+    # Validate position embedding size matches config
+    if hasattr(model, 'config') and hasattr(model, 'position_embedding'):
+        config_max_length = model.config.max_length
+        actual_max_length = model.position_embedding.num_embeddings
+        
+        if config_max_length != actual_max_length:
+            print(f"\\n⚠️  Position embedding size mismatch detected!")
+            print(f"   Config max_length: {config_max_length} | Actual: {actual_max_length}")
+            print(f"   Using actual position embedding size: {actual_max_length}")
+            model.config.max_length = actual_max_length
+    
     return model, checkpoint
 
 
@@ -685,6 +704,10 @@ def main():
         # Load checkpoint
         model, checkpoint = load_checkpoint(args.checkpoint, device)
         
+        # Extract max_length from model configuration
+        max_length = model.config.max_length if hasattr(model, 'config') else 512
+        print(f"Using max_length: {max_length}")
+        
         # Load data
         print(f"\\nLoading data: {args.data}")
         dataset = LLMDataset(str(data_path))
@@ -693,15 +716,30 @@ def main():
             batch_size=args.batch_size,
             shuffle=False,
             num_workers=0,
-            pin_memory=(device == 'cuda')
+            pin_memory=(device == 'cuda'),
+            max_length=max_length
         )
         print(f"✓ Loaded {len(dataset)} examples")
         
         # Create evaluator
         evaluator = Evaluator(model, device)
         
-        # Evaluate
-        metrics = evaluator.evaluate(dataloader)
+        # Evaluate with enhanced error handling
+        try:
+            metrics = evaluator.evaluate(dataloader)
+        except IndexError as e:
+            if "index out of range" in str(e):
+                print("\\n" + "=" * 60)
+                print("❌ POSITION EMBEDDING INDEX ERROR")
+                print("=" * 60)
+                print(f"Model max_length: {max_length}")
+                print(f"\\nThis error occurs when validation sequences exceed the model's maximum length.")
+                print(f"\\nSolutions:")
+                print(f"  1. Reprocess validation data with max_length={max_length}")
+                print(f"  2. Increase model's max_length in config and retrain")
+                print(f"  3. Check data preprocessing pipeline")
+                print("=" * 60)
+            raise
         
         # Display results
         print("\\n" + "=" * 60)
@@ -3026,6 +3064,11 @@ ${config.plugins.length > 0 ? `### Enabled Plugins\n\n${config.plugins.map(p => 
 
 ### "Vocab size mismatch detected"
 ✅ **This is normal!** The tool auto-detects and uses the correct vocab size from your tokenizer.
+
+### "Position embedding index error" or sequences too long
+✅ **Automatically handled!** Sequences exceeding max_length are truncated with warnings.
+- Check data preprocessing if you see frequent truncation warnings
+- Consider increasing \`max_length\` in config if needed (requires retraining)
 
 ### "Model may be too large for dataset"
 ⚠️ **Warning:** Risk of overfitting

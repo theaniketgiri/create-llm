@@ -221,7 +221,8 @@ def create_dataloader(
     batch_size: int = 32,
     shuffle: bool = True,
     num_workers: int = 0,
-    pin_memory: bool = True
+    pin_memory: bool = True,
+    max_length: int = None
 ):
     """
     Create DataLoader with optimal settings
@@ -232,11 +233,31 @@ def create_dataloader(
         shuffle: Whether to shuffle data
         num_workers: Number of worker processes
         pin_memory: Pin memory for faster GPU transfer
+        max_length: Maximum sequence length (truncate if exceeded)
     
     Returns:
         DataLoader instance
     """
     from torch.utils.data import DataLoader
+    
+    def collate_fn(batch):
+        """Custom collate function with optional max_length truncation"""
+        # Stack tensors from batch
+        input_ids = torch.stack([item['input_ids'] for item in batch])
+        attention_mask = torch.stack([item['attention_mask'] for item in batch])
+        labels = torch.stack([item['labels'] for item in batch])
+        
+        # Apply max_length constraint if specified
+        if max_length is not None:
+            input_ids = input_ids[:, :max_length]
+            attention_mask = attention_mask[:, :max_length]
+            labels = labels[:, :max_length]
+        
+        return {
+            'input_ids': input_ids,
+            'attention_mask': attention_mask,
+            'labels': labels
+        }
     
     return DataLoader(
         dataset,
@@ -244,7 +265,8 @@ def create_dataloader(
         shuffle=shuffle,
         num_workers=num_workers,
         pin_memory=pin_memory and torch.cuda.is_available(),
-        drop_last=True  # Drop incomplete batches
+        drop_last=True,  # Drop incomplete batches
+        collate_fn=collate_fn if max_length is not None else None
     )
 
 

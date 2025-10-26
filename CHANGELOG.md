@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-10-26
+
+### 🐛 Fixed
+
+#### Position Embedding Bug Fix
+- **Critical Fix**: Resolved `IndexError: index out of range in self` that occurred when validation sequences exceeded model's max_length
+- Added automatic sequence truncation in GPT model forward method with warning logs
+- Implemented max_length parameter in DataLoader with custom collate function
+- Added position embedding size validation in checkpoint loading
+- Enhanced error handling with detailed diagnostic messages and actionable solutions
+- Fixed tensor contiguity issues by using `reshape()` instead of `view()` for loss calculation
+
+#### Improvements
+- Added model configuration logging in Evaluator class (displays max_length, vocab_size, position embedding size)
+- Evaluation script now extracts and uses max_length from loaded model
+- Enhanced error messages provide clear guidance on fixing sequence length issues
+- Added comprehensive unit and integration tests for sequence length validation
+
+#### Documentation
+- Updated README with position embedding troubleshooting section
+- Added implementation guide for applying fixes to existing projects
+- Created detailed test results documentation
+- Updated smart defaults section to mention automatic sequence length handling
+
+### 🧪 Testing
+- Added 3 unit tests for sequence length validation
+- Added 5 integration tests for evaluation with various sequence lengths
+- All tests pass successfully with sequences at, exceeding, and far beyond max_length
+
 ## [1.0.0] - 2025-01-24
 
 ### 🎉 Initial Release

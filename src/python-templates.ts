@@ -162,6 +162,18 @@ class GPTModel(nn.Module):
     def forward(self, input_ids, attention_mask=None, labels=None):
         B, T = input_ids.shape
         
+        # Validate and clamp sequence length to prevent position embedding index errors
+        if T > self.config.max_length:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Input sequence length {T} exceeds max_length {self.config.max_length}. Truncating to {self.config.max_length}.")
+            input_ids = input_ids[:, :self.config.max_length]
+            if attention_mask is not None:
+                attention_mask = attention_mask[:, :self.config.max_length]
+            if labels is not None:
+                labels = labels[:, :self.config.max_length]
+            T = self.config.max_length
+        
         # Get embeddings
         token_emb = self.token_embedding(input_ids)
         pos = torch.arange(0, T, dtype=torch.long, device=input_ids.device)
@@ -180,8 +192,8 @@ class GPTModel(nn.Module):
         loss = None
         if labels is not None:
             loss = F.cross_entropy(
-                logits.view(-1, logits.size(-1)),
-                labels.view(-1),
+                logits.reshape(-1, logits.size(-1)),
+                labels.reshape(-1),
                 ignore_index=-100
             )
         
