@@ -1731,7 +1731,7 @@ class ChatInterface:
         
         try:
             # Load checkpoint
-            checkpoint = torch.load(self.checkpoint_path, map_location='cpu')
+            checkpoint = torch.load(self.checkpoint_path, map_location='cpu', weights_only=False)
             
             # Load model
             self.model = load_model_from_config()
@@ -1926,7 +1926,8 @@ class ChatInterface:
             chatbot = gr.Chatbot(
                 label="Conversation",
                 height=500,
-                show_copy_button=True
+                show_copy_button=True,
+                type="tuples"
             )
             
             with gr.Row():
