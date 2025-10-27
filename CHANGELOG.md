@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.1] - 2025-10-26
 
-### 🐛 Fixed
+### Fixed
 
 #### Position Embedding Bug Fix
 - **Critical Fix**: Resolved `IndexError: index out of range in self` that occurred when validation sequences exceeded model's max_length
@@ -29,21 +29,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created detailed test results documentation
 - Updated smart defaults section to mention automatic sequence length handling
 
-### 🧪 Testing
+### Testing
 - Added 3 unit tests for sequence length validation
 - Added 5 integration tests for evaluation with various sequence lengths
 - All tests pass successfully with sequences at, exceeding, and far beyond max_length
 
 ## [1.0.0] - 2025-01-24
 
-### 🎉 Initial Release
-
-The first production-ready release of create-llm!
-
-### ✨ Added
+### Added
 
 #### Templates
-- **NANO Template** (1M params) - Perfect for learning and quick experiments
+- **NANO Template** (1M params) - For learning and quick experiments
 - **TINY Template** (6M params) - For prototyping and small projects
 - **SMALL Template** (100M params) - For production applications
 - **BASE Template** (1B params) - For research and high-quality models
@@ -77,23 +73,23 @@ The first production-ready release of create-llm!
 - Contributing guidelines
 - Troubleshooting guides
 
-### 🔧 Technical Details
+### Technical Details
 
 - Node.js 18+ required
 - Python 3.8+ required
 - PyTorch 2.0+ required
 - Cross-platform support (Windows, macOS, Linux)
 
-### 🐛 Bug Fixes
+### Bug Fixes
 
 - Fixed data loading with 2D tensors
-- Fixed vocab size mismatch (32K → auto-detect)
+- Fixed vocab size mismatch (32K to auto-detect)
 - Fixed Windows UTF-8 encoding issues
 - Fixed deploy.py unicode escape errors
 - Fixed chat.py cross-platform path handling
 - Fixed model forward method to accept attention_mask
 
-### 📝 Known Issues
+### Known Issues
 
 - Dashboard may show garbled emojis in Windows PowerShell (functionality works)
 - PyTorch FutureWarning about torch.load (will be addressed in PyTorch 2.x)
@@ -115,6 +111,7 @@ The first production-ready release of create-llm!
 
 ## Version History
 
+- **2.0.1** (2025-10-26) - Position embedding bug fix
 - **1.0.0** (2025-01-24) - Initial release
 - **0.1.0** (2025-01-20) - Beta release (internal)
 

@@ -1,20 +1,15 @@
-<div align="center">
+# create-llm
 
-# 🚀 create-llm
+**CLI tool for scaffolding LLM training projects**
 
-**The fastest way to start training your own Language Model**
-
-Create production-ready LLM training projects in seconds. Like `create-next-app` but for training custom language models.
+Create production-ready LLM training projects in seconds. Similar to create-next-app but for training custom language models.
 
 [![npm version](https://img.shields.io/npm/v/@theanikrtgiri/create-llm.svg)](https://www.npmjs.com/package/@theanikrtgiri/create-llm)
 [![npm downloads](https://img.shields.io/npm/dm/@theanikrtgiri/create-llm.svg)](https://www.npmjs.com/package/@theanikrtgiri/create-llm)
 [![GitHub stars](https://img.shields.io/github/stars/theaniketgiri/create-llm.svg)](https://github.com/theaniketgiri/create-llm/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub issues](https://img.shields.io/github/issues/theaniketgiri/create-llm.svg)](https://github.com/theaniketgiri/create-llm/issues)
 
-[**📦 npm Package**](https://www.npmjs.com/package/@theanikrtgiri/create-llm) • [**📖 Documentation**](#documentation) • [**🐛 Report Bug**](https://github.com/theaniketgiri/create-llm/issues) • [**💡 Request Feature**](https://github.com/theaniketgiri/create-llm/issues)
-
-</div>
+[npm Package](https://www.npmjs.com/package/@theanikrtgiri/create-llm) • [Documentation](#documentation) • [Report Bug](https://github.com/theaniketgiri/create-llm/issues) • [Request Feature](https://github.com/theaniketgiri/create-llm/issues)
 
 ```bash
 npx @theanikrtgiri/create-llm my-awesome-llm
@@ -23,40 +18,34 @@ pip install -r requirements.txt
 python training/train.py
 ```
 
-<div align="center">
-
-**That's it! You're training an LLM.** ✨
-
-</div>
-
 ---
 
 ## Why create-llm?
 
-Training a language model from scratch is complex. You need:
-- ✅ Model architecture (GPT, BERT, T5...)
-- ✅ Data preprocessing pipeline
-- ✅ Tokenizer training
-- ✅ Training loop with callbacks
-- ✅ Checkpoint management
-- ✅ Evaluation metrics
-- ✅ Text generation
-- ✅ Deployment tools
+Training a language model from scratch requires:
+- Model architecture (GPT, BERT, T5...)
+- Data preprocessing pipeline
+- Tokenizer training
+- Training loop with callbacks
+- Checkpoint management
+- Evaluation metrics
+- Text generation
+- Deployment tools
 
-**create-llm gives you all of this in one command.**
+**create-llm provides all of this in one command.**
 
 ---
 
 ## Features
 
-### 🎯 **Right-Sized Templates**
+### Right-Sized Templates
 Choose from 4 templates optimized for different use cases:
 - **NANO** (1M params) - Learn in 2 minutes on any laptop
 - **TINY** (6M params) - Prototype in 15 minutes on CPU
 - **SMALL** (100M params) - Production models in hours
 - **BASE** (1B params) - Research-grade in days
 
-### 🔧 **Complete Toolkit**
+### Complete Toolkit
 Everything you need out of the box:
 - PyTorch training infrastructure
 - Data preprocessing pipeline
@@ -68,7 +57,7 @@ Everything you need out of the box:
 - Model comparison tools
 - Deployment scripts
 
-### 📊 **Smart Defaults**
+### Smart Defaults
 Intelligent configuration that:
 - Auto-detects vocab size from tokenizer
 - Automatically handles sequence length mismatches
@@ -78,17 +67,16 @@ Intelligent configuration that:
 - Handles cross-platform paths
 - Provides detailed diagnostic messages for errors
 
-### 🎨 **Plugin System**
+### Plugin System
 Optional integrations:
 - **WandB** - Experiment tracking
 - **HuggingFace** - Model sharing
-- **SynthexAI** - Synthetic data generation
 
 ---
 
 ## Quick Start
 
-### 🚀 One-Command Setup
+### One-Command Setup
 
 ```bash
 # Using npx (recommended - no installation needed)
@@ -99,31 +87,31 @@ npm install -g @theanikrtgiri/create-llm
 create-llm my-llm
 ```
 
-### 🎯 Interactive Setup
+### Interactive Setup
 
 ```bash
 npx @theanikrtgiri/create-llm
 ```
 
-**You'll be prompted for:**
-- 📝 Project name
-- 🎯 Template (NANO, TINY, SMALL, BASE)
-- 🔤 Tokenizer type (BPE, WordPiece, Unigram)
-- 🔌 Optional plugins (WandB, HuggingFace, SynthexAI)
+You'll be prompted for:
+- Project name
+- Template (NANO, TINY, SMALL, BASE)
+- Tokenizer type (BPE, WordPiece, Unigram)
+- Optional plugins (WandB, HuggingFace, SynthexAI)
 
-### ⚡ Quick Mode
+### Quick Mode
 
 ```bash
 # Specify everything upfront
-npx @theanikrtgiri/create-llm my-llm --template tiny --tokenizer bpe --skip-install
+npx create-llm my-llm --template tiny --tokenizer bpe --skip-install
 ```
 
 ---
 
 ## Templates
 
-### 📦 NANO (NEW!)
-**Perfect for learning and quick experiments**
+### NANO
+**For learning and quick experiments**
 
 ```
 Parameters: ~1M
@@ -133,15 +121,15 @@ Data:       100+ examples
 Use:        Learning, testing, demos
 ```
 
-**When to use:**
+When to use:
 - First time training an LLM
 - Quick experiments and testing
 - Educational purposes
 - Understanding the pipeline
 - Limited data (100-1000 examples)
 
-### 📦 TINY
-**Perfect for prototyping and small projects**
+### TINY
+**For prototyping and small projects**
 
 ```
 Parameters: ~6M
@@ -151,15 +139,15 @@ Data:       1,000+ examples
 Use:        Prototypes, small projects
 ```
 
-**When to use:**
+When to use:
 - Small-scale projects
 - Limited data (1K-10K examples)
 - Prototyping before scaling
 - Personal experiments
 - CPU-only environments
 
-### 📦 SMALL
-**Perfect for production applications**
+### SMALL
+**For production applications**
 
 ```
 Parameters: ~100M
@@ -169,15 +157,15 @@ Data:       10,000+ examples
 Use:        Production, real apps
 ```
 
-**When to use:**
+When to use:
 - Production applications
 - Domain-specific models
 - Real-world deployments
 - Good data availability
 - GPU available
 
-### 📦 BASE
-**Perfect for research and high-quality models**
+### BASE
+**For research and high-quality models**
 
 ```
 Parameters: ~1B
@@ -187,7 +175,7 @@ Data:       100,000+ examples
 Use:        Research, high-quality
 ```
 
-**When to use:**
+When to use:
 - Research projects
 - High-quality requirements
 - Large datasets available
@@ -198,20 +186,20 @@ Use:        Research, high-quality
 
 ## Complete Workflow
 
-### 1️⃣ Create Your Project
+### 1. Create Your Project
 
 ```bash
 npx @theanikrtgiri/create-llm my-llm --template tiny --tokenizer bpe
 cd my-llm
 ```
 
-### 2️⃣ Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Add Your Data
+### 3. Add Your Data
 
 Place your text files in `data/raw/`:
 
@@ -223,43 +211,31 @@ curl https://www.gutenberg.org/files/100/100-0.txt > data/raw/shakespeare.txt
 cp /path/to/your/data.txt data/raw/
 ```
 
-<div align="center">
+**Tip:** Start with at least 1MB of text for meaningful results
 
-**💡 Pro Tip:** Start with at least 1MB of text for meaningful results
-
-</div>
-
-### 4️⃣ Train Tokenizer
+### 4. Train Tokenizer
 
 ```bash
 python tokenizer/train.py --data data/raw/
 ```
 
-<div align="center">
+This creates a vocabulary from your data.
 
-**🔤 This creates a vocabulary from your data**
-
-</div>
-
-### 5️⃣ Prepare Dataset
+### 5. Prepare Dataset
 
 ```bash
 python data/prepare.py
 ```
 
-<div align="center">
+This tokenizes and prepares your data for training.
 
-**📊 This tokenizes and prepares your data for training**
-
-</div>
-
-### 6️⃣ Start Training
+### 6. Start Training
 
 ```bash
 # Basic training
 python training/train.py
 
-# With live dashboard (recommended!)
+# With live dashboard
 python training/train.py --dashboard
 # Then open http://localhost:5000
 
@@ -267,19 +243,13 @@ python training/train.py --dashboard
 python training/train.py --resume checkpoints/checkpoint-1000.pt
 ```
 
-<div align="center">
-
-**📈 Watch your model learn in real-time!**
-
-</div>
-
-### 7️⃣ Evaluate Your Model
+### 7. Evaluate Your Model
 
 ```bash
 python evaluation/evaluate.py --checkpoint checkpoints/checkpoint-best.pt
 ```
 
-### 8️⃣ Generate Text
+### 8. Generate Text
 
 ```bash
 python evaluation/generate.py \
@@ -288,25 +258,13 @@ python evaluation/generate.py \
   --temperature 0.8
 ```
 
-<div align="center">
-
-**✨ See your model's creativity in action!**
-
-</div>
-
-### 9️⃣ Interactive Chat
+### 9. Interactive Chat
 
 ```bash
 python chat.py --checkpoint checkpoints/checkpoint-best.pt
 ```
 
-<div align="center">
-
-**💬 Chat with your trained model!**
-
-</div>
-
-### 🔟 Deploy
+### 10. Deploy
 
 ```bash
 # To Hugging Face
@@ -316,25 +274,19 @@ python deploy.py --to huggingface --repo-id username/my-model
 python deploy.py --to replicate --model-name my-model
 ```
 
-<div align="center">
-
-**🚀 Share your model with the world!**
-
-</div>
-
 ---
 
 ## Project Structure
 
 ```
 my-llm/
-├── 📁 data/
+├── data/
 │   ├── raw/              # Your training data goes here
 │   ├── processed/        # Tokenized data (auto-generated)
 │   ├── dataset.py        # PyTorch dataset classes
 │   └── prepare.py        # Data preprocessing script
 │
-├── 📁 models/
+├── models/
 │   ├── architectures/    # Model implementations
 │   │   ├── gpt.py       # GPT architecture
 │   │   ├── nano.py      # 1M parameter model
@@ -344,40 +296,29 @@ my-llm/
 │   ├── __init__.py
 │   └── config.py        # Configuration loader
 │
-├── 📁 tokenizer/
+├── tokenizer/
 │   ├── train.py         # Tokenizer training script
 │   └── tokenizer.json   # Trained tokenizer (auto-generated)
 │
-├── 📁 training/
+├── training/
 │   ├── train.py         # Main training script
 │   ├── trainer.py       # Trainer class
 │   ├── callbacks/       # Training callbacks
-│   │   ├── base.py
-│   │   ├── checkpoint.py
-│   │   ├── logging.py
-│   │   └── checkpoint_manager.py
 │   └── dashboard/       # Live training dashboard
-│       ├── dashboard_server.py
-│       └── templates/
 │
-├── 📁 evaluation/
+├── evaluation/
 │   ├── evaluate.py      # Model evaluation
 │   └── generate.py      # Text generation
 │
-├── 📁 plugins/          # Optional integrations
-│   ├── wandb_plugin.py
-│   ├── huggingface_plugin.py
-│   └── synthex_plugin.py
+├── plugins/             # Optional integrations
+├── checkpoints/         # Saved models (auto-generated)
+├── logs/               # Training logs (auto-generated)
 │
-├── 📁 checkpoints/      # Saved models (auto-generated)
-├── 📁 logs/            # Training logs (auto-generated)
-│
-├── 📄 llm.config.js    # Main configuration file
-├── 📄 requirements.txt # Python dependencies
-├── 📄 chat.py         # Interactive chat interface
-├── 📄 deploy.py       # Deployment script
-├── 📄 compare.py      # Model comparison tool
-└── 📄 README.md       # Project documentation
+├── llm.config.js       # Main configuration file
+├── requirements.txt    # Python dependencies
+├── chat.py            # Interactive chat interface
+├── deploy.py          # Deployment script
+└── README.md          # Project documentation
 ```
 
 ---
@@ -408,27 +349,6 @@ module.exports = {
     max_steps: 10000,
     eval_interval: 500,
     save_interval: 2000,
-    optimizer: 'adamw',
-    weight_decay: 0.01,
-    gradient_clip: 1.0,
-    mixed_precision: false,
-    gradient_accumulation_steps: 1,
-  },
-
-  // Data settings
-  data: {
-    max_length: 512,
-    stride: 256,
-    val_split: 0.1,
-    shuffle: true,
-  },
-
-  // Tokenizer settings
-  tokenizer: {
-    type: 'bpe',
-    vocab_size: 10000,
-    min_frequency: 2,
-    special_tokens: ["<pad>", "<unk>", "<s>", "</s>"],
   },
 
   // Plugins
@@ -442,7 +362,7 @@ module.exports = {
 
 ---
 
-## 📋 CLI Reference
+## CLI Reference
 
 ### Commands
 
@@ -475,72 +395,6 @@ npx @theanikrtgiri/create-llm my-project --template nano --tokenizer bpe --skip-
 
 # Skip prompts
 npx @theanikrtgiri/create-llm my-project -y
-```
-
----
-
-## Advanced Features
-
-### Live Training Dashboard
-
-Monitor training in real-time with a web interface:
-
-```bash
-python training/train.py --dashboard
-```
-
-Then open http://localhost:5000 to see:
-- Real-time loss curves
-- Learning rate schedule
-- Tokens per second
-- GPU memory usage
-- Recent checkpoints
-
-### Model Comparison
-
-Compare multiple trained models:
-
-```bash
-python compare.py checkpoints/model-v1/ checkpoints/model-v2/
-```
-
-Shows:
-- Side-by-side metrics
-- Sample generations
-- Performance comparison
-- Recommendation
-
-### Checkpoint Management
-
-Automatic checkpoint management:
-- Saves best model based on validation loss
-- Keeps last N checkpoints (configurable)
-- Auto-saves on Ctrl+C
-- Resume from any checkpoint
-
-```bash
-# Resume training
-python training/train.py --resume checkpoints/checkpoint-5000.pt
-
-# Evaluate specific checkpoint
-python evaluation/evaluate.py --checkpoint checkpoints/checkpoint-best.pt
-```
-
-### Custom Plugins
-
-Create your own plugins:
-
-```python
-# plugins/my_plugin.py
-from plugins.base import BasePlugin
-
-class MyPlugin(BasePlugin):
-    def on_train_start(self, trainer):
-        print("Training started!")
-    
-    def on_step_end(self, trainer, step, loss):
-        # Log to your service
-        pass
 ```
 
 ---
@@ -578,27 +432,6 @@ class MyPlugin(BasePlugin):
 - Monitor GPU usage with dashboard
 - Save checkpoints frequently
 
-**Hyperparameter Tuning:**
-- Learning rate: Start with 3e-4, adjust if unstable
-- Batch size: As large as GPU allows
-- Warmup steps: 10% of total steps
-- Dropout: 0.1-0.3 depending on data size
-
-### Deployment
-
-**Before Deploying:**
-- Evaluate on held-out test set
-- Test generation quality
-- Check model size
-- Verify inference speed
-- Test on target hardware
-
-**Deployment Options:**
-- Hugging Face Hub (easiest)
-- Replicate (API endpoint)
-- Docker container (custom)
-- Cloud platforms (AWS, GCP, Azure)
-
 ---
 
 ## Troubleshooting
@@ -606,33 +439,24 @@ class MyPlugin(BasePlugin):
 ### Common Issues
 
 **"Vocab size mismatch detected"**
-- ✅ This is normal! The tool auto-detects and fixes it
-- The model will use the actual tokenizer vocab size
+- This is normal. The tool auto-detects and fixes it.
+- The model will use the actual tokenizer vocab size.
 
 **"Position embedding index error" or sequences too long**
-- ✅ Automatically handled! Sequences exceeding max_length are truncated
-- The model logs warnings when truncation occurs
-- Check your data preprocessing if you see frequent truncation warnings
-- Consider increasing `max_length` in config if you need longer sequences
-- Note: Increasing max_length requires retraining from scratch
+- Automatically handled. Sequences exceeding max_length are truncated.
+- The model logs warnings when truncation occurs.
+- Check your data preprocessing if you see frequent truncation warnings.
+- Consider increasing `max_length` in config if you need longer sequences.
 
 **"Model may be too large for dataset"**
-- ⚠️ Warning: Risk of overfitting
+- Warning: Risk of overfitting
 - Solutions: Add more data, use smaller template, increase dropout
-
-**"Perplexity < 1.1 indicates severe overfitting"**
-- ❌ Model memorized the data
-- Solutions: Add much more data, use smaller model, increase regularization
 
 **"CUDA out of memory"**
 - Reduce `batch_size` in llm.config.js
 - Enable `mixed_precision: true`
 - Increase `gradient_accumulation_steps`
 - Use smaller model template
-
-**"Tokenizer not found"**
-- Run `python tokenizer/train.py --data data/raw/` first
-- Make sure data/raw/ contains .txt files
 
 **"Training loss not decreasing"**
 - Check learning rate (try 1e-4 to 1e-3)
@@ -642,10 +466,9 @@ class MyPlugin(BasePlugin):
 
 ### Getting Help
 
-- 📖 [Full Documentation](https://github.com/theaniketgiri/create-llm/docs)
-- 💬 [Discord Community](https://discord.gg/create-llm)
-- 🐛 [Report Issues](https://github.com/theaniketgiri/create-llm/issues)
-- 📧 [Email Support](mailto:theaniketgiri@gmail.com)
+- [Full Documentation](https://github.com/theaniketgiri/create-llm/docs)
+- [Report Issues](https://github.com/theaniketgiri/create-llm/issues)
+- [Email Support](mailto:theaniketgiri@gmail.com)
 
 ---
 
@@ -663,111 +486,36 @@ class MyPlugin(BasePlugin):
 - 40GB+ VRAM for BASE
 
 ### Operating Systems
-- ✅ Windows 10/11
-- ✅ macOS 10.15+
-- ✅ Linux (Ubuntu 20.04+)
+- Windows 10/11
+- macOS 10.15+
+- Linux (Ubuntu 20.04+)
 
 ---
 
 ## Development
 
-### Setup Development Environment
-
-```bash
-git clone https://github.com/theaniketgiri/create-llm.git
-cd create-llm
-npm install
-```
-
-### Build
-
-```bash
-npm run build
-```
-
-### Development Mode
-
-```bash
-npm run dev
-```
-
-### Test Locally
-
-```bash
-node dist/index.js test-project --template nano
-```
-
-### Run Tests
-
-```bash
-npm test
-```
-
-### Publish
-
-```bash
-npm version patch  # or minor/major
-npm publish
-```
+See [DEVELOPMENT.md](DEVELOPMENT.md) for development setup and guidelines.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-<div align="center">
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-**We welcome contributions from everyone!**
-
-[**📖 Contributing Guide**](CONTRIBUTING.md) • [**🐛 Report Bug**](https://github.com/theaniketgiri/create-llm/issues) • [**💡 Request Feature**](https://github.com/theaniketgiri/create-llm/issues)
-
-</div>
-
-### 🎯 Areas We Need Help
+### Areas We Need Help
 
 | Area | Description | Difficulty |
 |------|-------------|------------|
-| 🐛 **Bug Fixes** | Fix issues and improve stability | 🟢 Easy |
-| 📝 **Documentation** | Improve guides and examples | 🟢 Easy |
-| 🎨 **New Templates** | Add BERT, T5, custom architectures | 🟡 Medium |
-| 🔌 **Plugins** | Integrate new services | 🟡 Medium |
-| 🧪 **Testing** | Increase test coverage | 🟡 Medium |
-| 🌍 **i18n** | Internationalization support | 🔴 Hard |
-
-### 👥 Contributors
-
-<div align="center">
-
-Thanks to all contributors who have helped make this project better!
-
-[![Contributors](https://contrib.rocks/image?repo=theaniketgiri/create-llm)](https://github.com/theaniketgiri/create-llm/graphs/contributors)
-
-</div>
+| Bug Fixes | Fix issues and improve stability | Easy |
+| Documentation | Improve guides and examples | Easy |
+| New Templates | Add BERT, T5, custom architectures | Medium |
+| Plugins | Integrate new services | Medium |
+| Testing | Increase test coverage | Medium |
+| i18n | Internationalization support | Hard |
 
 ---
 
-## Roadmap
-
-### v1.1 (Next Release)
-- [ ] More model architectures (BERT, T5)
-- [ ] Distributed training support
-- [ ] Model quantization tools
-- [ ] Fine-tuning templates
-
-### v1.2
-- [ ] Web UI for project management
-- [ ] Automatic hyperparameter tuning
-- [ ] Model compression tools
-- [ ] More deployment targets
-
-### v2.0
-- [ ] Multi-modal support
-- [ ] Reinforcement learning from human feedback
-- [ ] Advanced optimization techniques
-- [ ] Cloud training integration
-
----
-
-## 📄 License
+## License
 
 MIT © [Aniket Giri](https://github.com/theaniketgiri)
 
@@ -777,44 +525,15 @@ See [LICENSE](LICENSE) for more information.
 
 ## Acknowledgments
 
-Built with amazing open-source tools:
+Built with:
 - [PyTorch](https://pytorch.org/) - Deep learning framework
 - [Transformers](https://huggingface.co/transformers/) - Model implementations
 - [Tokenizers](https://github.com/huggingface/tokenizers) - Fast tokenization
 - [Commander.js](https://github.com/tj/commander.js) - CLI framework
 - [Inquirer.js](https://github.com/SBoudrias/Inquirer.js) - Interactive prompts
 
-Special thanks to the LLM community for inspiration and feedback.
-
 ---
-
-## ⭐ Star History
-
-<div align="center">
 
 If you find this project useful, please consider giving it a star!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=theaniketgiri/create-llm&type=Date)](https://star-history.com/#theaniketgiri/create-llm&Date)
-
-</div>
-
----
-
-<div align="center">
-
-**Made with ❤️ for the LLM community**
-
-[**GitHub**](https://github.com/theaniketgiri/create-llm) • [**npm**](https://www.npmjs.com/package/@theanikrtgiri/create-llm) • [**Issues**](https://github.com/theaniketgiri/create-llm/issues) • [**Twitter**](https://twitter.com/theaniketgiri)
-
-### 🙏 Support This Project
-
-If create-llm helped you, consider:
-- ⭐ Starring the repo
-- 🐛 Reporting bugs
-- 💡 Suggesting features
-- 📝 Improving docs
-- 🔀 Contributing code
-
-**Together, let's make LLM training accessible to everyone!**
-
-</div>
+[GitHub](https://github.com/theaniketgiri/create-llm) • [npm](https://www.npmjs.com/package/@theanikrtgiri/create-llm) • [Issues](https://github.com/theaniketgiri/create-llm/issues)
