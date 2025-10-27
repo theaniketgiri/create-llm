@@ -1,6 +1,6 @@
 {
-  "name": "create-llm",
-  "version": "2.0.1",
+  "name": "@theanikrtgiri/create-llm",
+  "version": "2.1.1",
   "description": "The fastest way to start training your own Language Model. Create production-ready LLM training projects in seconds.",
   "main": "dist/index.js",
   "bin": {

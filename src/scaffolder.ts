@@ -185,6 +185,7 @@ export class ScaffolderEngine {
         this.createFile('evaluation/evaluate.py', this.getEvaluationScriptTemplate());
         this.createFile('evaluation/generate.py', this.getGenerationScriptTemplate());
         this.createFile('chat.py', this.getChatScriptTemplate());
+        this.createFile('chat_interface.py', this.getChatInterfaceTemplate());
         this.createFile('deploy.py', this.getDeployScriptTemplate());
         this.createFile('compare.py', this.getCompareScriptTemplate());
     }
@@ -481,17 +482,118 @@ def main():
         print("=" * 60)
         trainer.train()
         
-        print("\\n✅ Training completed successfully!")
+        print("\\nTraining completed successfully!")
+        
+        # Post-training menu
+        while True:
+            choice = show_post_training_menu()
+            
+            if choice == 'continue':
+                continue_training(trainer, config)
+            elif choice == 'chat':
+                launch_chat_interface()
+            else:
+                break
         
     except KeyboardInterrupt:
-        print("\\n\\n⚠️  Training interrupted by user")
+        print("\\n\\nTraining interrupted by user")
         sys.exit(0)
     
     except Exception as e:
-        print(f"\\n❌ Training failed: {e}")
+        print(f"\\nERROR: Training failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
+
+
+def show_post_training_menu():
+    """
+    Display post-training options menu
+    
+    Returns:
+        User's choice ('continue', 'chat', 'exit')
+    """
+    print("\\n" + "=" * 60)
+    print("Training Complete!")
+    print("=" * 60)
+    print("\\nWhat would you like to do next?")
+    print("  1. Continue training (add more steps)")
+    print("  2. Launch chat interface (test your model)")
+    print("  3. Exit")
+    
+    while True:
+        choice = input("\\nEnter your choice (1-3): ").strip()
+        
+        if choice == '1':
+            return 'continue'
+        elif choice == '2':
+            return 'chat'
+        elif choice == '3':
+            return 'exit'
+        else:
+            print("Invalid choice. Please enter 1, 2, or 3.")
+
+
+def continue_training(trainer, config):
+    """
+    Continue training with additional steps
+    
+    Args:
+        trainer: Trainer instance
+        config: Configuration object
+    """
+    try:
+        additional_steps = input("\\nHow many additional steps? (default: 1000): ").strip()
+        
+        if not additional_steps:
+            additional_steps = 1000
+        else:
+            additional_steps = int(additional_steps)
+        
+        if additional_steps <= 0:
+            print("Invalid number of steps. Must be positive.")
+            return
+        
+        print(f"\\nContinuing training for {additional_steps} more steps...")
+        
+        # Update max_steps
+        current_step = trainer.global_step
+        trainer.max_steps = current_step + additional_steps
+        
+        # Resume training
+        print("\\n" + "=" * 60)
+        print("Resuming training...")
+        print("=" * 60)
+        trainer.train()
+        
+        print("\\nAdditional training completed!")
+        
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+    except KeyboardInterrupt:
+        print("\\n\\nTraining cancelled.")
+
+
+def launch_chat_interface():
+    """Launch Gradio chat interface"""
+    print("\\nLaunching chat interface...")
+    print("The interface will open in your browser.")
+    print("Press Ctrl+C to stop the server.\\n")
+    
+    try:
+        from chat_interface import ChatInterface
+        
+        chat = ChatInterface()
+        chat.load_model()
+        chat.launch()
+        
+    except ImportError:
+        print("ERROR: Gradio not installed.")
+        print("Install with: pip install gradio")
+    except KeyboardInterrupt:
+        print("\\n\\nChat interface stopped.")
+    except Exception as e:
+        print(f"ERROR: Failed to launch chat interface: {e}")
 
 
 if __name__ == '__main__':
@@ -1530,6 +1632,452 @@ if __name__ == '__main__':
 `;
     }
 
+    private getChatInterfaceTemplate(): string {
+        return `#!/usr/bin/env python3
+"""
+Gradio Chat Interface
+Web-based chat interface for interacting with trained model
+"""
+
+import sys
+import torch
+from pathlib import Path
+from typing import List, Tuple, Optional
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+try:
+    import gradio as gr
+except ImportError:
+    print("ERROR: Gradio not installed.")
+    print("Install with: pip install gradio")
+    sys.exit(1)
+
+from models import load_model_from_config
+from tokenizers import Tokenizer
+
+
+class ChatInterface:
+    """
+    Gradio-based chat interface for trained model
+    """
+    
+    def __init__(self, checkpoint_path: Optional[str] = None):
+        """
+        Initialize chat interface
+        
+        Args:
+            checkpoint_path: Path to model checkpoint (auto-detect if None)
+        """
+        self.checkpoint_path = checkpoint_path or self._find_best_checkpoint()
+        self.model = None
+        self.tokenizer = None
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.model_info = {}
+        
+    def _find_best_checkpoint(self) -> str:
+        """
+        Find best checkpoint with priority:
+        1. checkpoint-best.pt
+        2. Most recent checkpoint-*.pt
+        3. checkpoint-final.pt
+        """
+        checkpoint_dir = Path('checkpoints')
+        
+        if not checkpoint_dir.exists():
+            raise FileNotFoundError(
+                "No checkpoints directory found. Please train a model first:\\n"
+                "  python training/train.py"
+            )
+        
+        # Priority 1: Best checkpoint
+        best_checkpoint = checkpoint_dir / 'checkpoint-best.pt'
+        if best_checkpoint.exists():
+            return str(best_checkpoint)
+        
+        # Priority 2: Most recent numbered checkpoint
+        checkpoints = list(checkpoint_dir.glob('checkpoint-*.pt'))
+        if checkpoints:
+            # Extract step numbers and find max
+            numbered = []
+            for cp in checkpoints:
+                try:
+                    # Handle both checkpoint-1000.pt and checkpoint-best.pt
+                    parts = cp.stem.split('-')
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        step = int(parts[1])
+                        numbered.append((step, cp))
+                except (ValueError, IndexError):
+                    continue
+            
+            if numbered:
+                numbered.sort(reverse=True)
+                return str(numbered[0][1])
+        
+        # Priority 3: Final checkpoint
+        final_checkpoint = checkpoint_dir / 'checkpoint-final.pt'
+        if final_checkpoint.exists():
+            return str(final_checkpoint)
+        
+        raise FileNotFoundError(
+            "No checkpoints found in checkpoints/\\n"
+            "Please train a model first: python training/train.py"
+        )
+    
+    def load_model(self):
+        """Load model and tokenizer from checkpoint"""
+        print(f"Loading model from: {self.checkpoint_path}")
+        
+        try:
+            # Load checkpoint
+            checkpoint = torch.load(self.checkpoint_path, map_location='cpu')
+            
+            # Load model
+            self.model = load_model_from_config()
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.model.to(self.device)
+            self.model.eval()
+            
+            # Store model info
+            self.model_info = {
+                'checkpoint': self.checkpoint_path,
+                'step': checkpoint.get('step', 'unknown'),
+                'loss': checkpoint.get('loss', 'unknown'),
+                'parameters': sum(p.numel() for p in self.model.parameters()),
+                'device': self.device
+            }
+            
+            # Load tokenizer
+            tokenizer_path = Path('tokenizer/tokenizer.json')
+            if not tokenizer_path.exists():
+                raise FileNotFoundError(
+                    "Tokenizer not found at tokenizer/tokenizer.json\\n"
+                    "Please train tokenizer first: python tokenizer/train.py --data data/raw/"
+                )
+            
+            self.tokenizer = Tokenizer.from_file(str(tokenizer_path))
+            
+            print(f"Model loaded successfully!")
+            print(f"  Parameters: {self.model_info['parameters']:,}")
+            print(f"  Device: {self.device}")
+            print(f"  Step: {self.model_info['step']}")
+            
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"ERROR: Failed to load model: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+    
+    def generate_response(
+        self,
+        message: str,
+        history: List[Tuple[str, str]],
+        temperature: float,
+        top_k: int,
+        top_p: float,
+        max_length: int
+    ) -> Tuple[str, List[Tuple[str, str]]]:
+        """
+        Generate response for user message
+        
+        Args:
+            message: User's message
+            history: Conversation history (list of [user_msg, bot_msg] pairs)
+            temperature: Sampling temperature
+            top_k: Top-k sampling
+            top_p: Nucleus sampling
+            max_length: Maximum tokens to generate
+        
+        Returns:
+            Tuple of (empty string for input box, updated history)
+        """
+        if not message.strip():
+            return "", history
+        
+        try:
+            # Build context from history
+            context_parts = []
+            for user_msg, bot_msg in history[-5:]:  # Keep last 5 turns
+                context_parts.append(f"User: {user_msg}")
+                if bot_msg:
+                    context_parts.append(f"Assistant: {bot_msg}")
+            
+            # Add current message
+            context_parts.append(f"User: {message}")
+            context_parts.append("Assistant:")
+            
+            context_text = "\\n".join(context_parts)
+            
+            # Encode
+            encoding = self.tokenizer.encode(context_text)
+            input_ids = torch.tensor([encoding.ids], dtype=torch.long, device=self.device)
+            
+            # Trim if too long
+            max_context = self.model.config.max_length - max_length
+            if input_ids.size(1) > max_context:
+                input_ids = input_ids[:, -max_context:]
+            
+            # Generate
+            with torch.no_grad():
+                generated_ids = self._generate(
+                    input_ids,
+                    max_length,
+                    temperature,
+                    top_k,
+                    top_p
+                )
+            
+            # Decode response (only new tokens)
+            response_ids = generated_ids[0, input_ids.size(1):].tolist()
+            response = self.tokenizer.decode(response_ids)
+            
+            # Clean up response
+            response = response.split("User:")[0].strip()
+            response = response.split("Assistant:")[0].strip()
+            
+            # Remove special tokens
+            for stop_word in ["<|endoftext|>", "</s>", "<eos>", "<pad>"]:
+                response = response.replace(stop_word, "")
+            response = response.strip()
+            
+            # If response is empty, provide fallback
+            if not response:
+                response = "I'm not sure how to respond to that."
+            
+            # Update history
+            history.append((message, response))
+            
+            return "", history
+            
+        except Exception as e:
+            error_msg = f"Error generating response: {str(e)}"
+            print(error_msg)
+            history.append((message, f"ERROR: {error_msg}"))
+            return "", history
+    
+    def _generate(
+        self,
+        input_ids: torch.Tensor,
+        max_length: int,
+        temperature: float,
+        top_k: int,
+        top_p: float
+    ) -> torch.Tensor:
+        """Generate tokens autoregressively"""
+        for _ in range(max_length):
+            # Crop to model's max length if needed
+            input_ids_cond = input_ids
+            if input_ids.size(1) > self.model.config.max_length:
+                input_ids_cond = input_ids[:, -self.model.config.max_length:]
+            
+            # Forward pass
+            outputs = self.model(input_ids_cond)
+            logits = outputs['logits']
+            
+            # Get next token logits
+            next_token_logits = logits[0, -1, :] / temperature
+            
+            # Apply top-k filtering
+            if top_k > 0:
+                top_k_values, _ = torch.topk(next_token_logits, min(top_k, next_token_logits.size(-1)))
+                indices_to_remove = next_token_logits < top_k_values[-1]
+                next_token_logits[indices_to_remove] = float('-inf')
+            
+            # Apply top-p filtering
+            if top_p < 1.0:
+                sorted_logits, sorted_indices = torch.sort(next_token_logits, descending=True)
+                cumulative_probs = torch.cumsum(torch.softmax(sorted_logits, dim=-1), dim=-1)
+                
+                sorted_indices_to_remove = cumulative_probs > top_p
+                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                sorted_indices_to_remove[..., 0] = 0
+                
+                indices_to_remove = sorted_indices[sorted_indices_to_remove]
+                next_token_logits[indices_to_remove] = float('-inf')
+            
+            # Sample
+            probs = torch.softmax(next_token_logits, dim=-1)
+            next_token = torch.multinomial(probs, num_samples=1)
+            
+            # Append to sequence
+            input_ids = torch.cat([input_ids, next_token.unsqueeze(0)], dim=1)
+            
+            # Check for EOS token (assuming token 2 is EOS)
+            if next_token.item() == 2:
+                break
+        
+        return input_ids
+    
+    def create_interface(self):
+        """Create Gradio interface"""
+        with gr.Blocks(title="LLM Chat Interface", theme=gr.themes.Soft()) as interface:
+            gr.Markdown("# Chat with Your Trained Model")
+            gr.Markdown(
+                f"**Checkpoint**: {Path(self.checkpoint_path).name}  |  "
+                f"**Step**: {self.model_info.get('step', 'unknown')}  |  "
+                f"**Parameters**: {self.model_info.get('parameters', 0):,}  |  "
+                f"**Device**: {self.device}"
+            )
+            
+            chatbot = gr.Chatbot(
+                label="Conversation",
+                height=500,
+                show_copy_button=True
+            )
+            
+            with gr.Row():
+                msg = gr.Textbox(
+                    label="Your message",
+                    placeholder="Type your message here and press Enter...",
+                    lines=2,
+                    scale=4
+                )
+                submit = gr.Button("Send", scale=1, variant="primary")
+            
+            with gr.Accordion("Generation Settings", open=False):
+                with gr.Row():
+                    temperature = gr.Slider(
+                        minimum=0.1,
+                        maximum=2.0,
+                        value=0.8,
+                        step=0.1,
+                        label="Temperature",
+                        info="Higher = more creative, Lower = more focused"
+                    )
+                    top_k = gr.Slider(
+                        minimum=1,
+                        maximum=100,
+                        value=50,
+                        step=1,
+                        label="Top-K",
+                        info="Number of top tokens to consider"
+                    )
+                
+                with gr.Row():
+                    top_p = gr.Slider(
+                        minimum=0.1,
+                        maximum=1.0,
+                        value=0.95,
+                        step=0.05,
+                        label="Top-P",
+                        info="Cumulative probability threshold"
+                    )
+                    max_length = gr.Slider(
+                        minimum=10,
+                        maximum=500,
+                        value=100,
+                        step=10,
+                        label="Max Length",
+                        info="Maximum tokens to generate"
+                    )
+            
+            with gr.Row():
+                clear = gr.Button("Clear Conversation")
+            
+            gr.Markdown("---")
+            gr.Markdown(
+                "**Tips**: Adjust temperature for creativity, use lower values for factual responses. "
+                "Press Ctrl+C in terminal to stop the server."
+            )
+            
+            # Event handlers
+            submit_event = submit.click(
+                self.generate_response,
+                inputs=[msg, chatbot, temperature, top_k, top_p, max_length],
+                outputs=[msg, chatbot]
+            )
+            
+            msg_event = msg.submit(
+                self.generate_response,
+                inputs=[msg, chatbot, temperature, top_k, top_p, max_length],
+                outputs=[msg, chatbot]
+            )
+            
+            clear.click(lambda: None, None, chatbot, queue=False)
+        
+        return interface
+    
+    def launch(self, share: bool = False, server_port: int = 7860):
+        """
+        Launch Gradio interface
+        
+        Args:
+            share: Create public shareable link
+            server_port: Port to run server on
+        """
+        interface = self.create_interface()
+        
+        print("\\n" + "=" * 60)
+        print("Launching Chat Interface...")
+        print("=" * 60)
+        print(f"Opening in browser at http://localhost:{server_port}")
+        print("Press Ctrl+C to stop the server")
+        print("=" * 60 + "\\n")
+        
+        try:
+            interface.launch(
+                server_name="127.0.0.1",
+                server_port=server_port,
+                share=share,
+                show_error=True
+            )
+        except OSError as e:
+            if "address already in use" in str(e).lower():
+                print(f"Port {server_port} is already in use. Trying port {server_port + 1}...")
+                interface.launch(
+                    server_name="127.0.0.1",
+                    server_port=server_port + 1,
+                    share=share,
+                    show_error=True
+                )
+            else:
+                raise
+
+
+def main():
+    """Main function for standalone usage"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Launch chat interface for trained model')
+    parser.add_argument(
+        '--checkpoint',
+        type=str,
+        help='Path to checkpoint (default: auto-detect best)'
+    )
+    parser.add_argument(
+        '--share',
+        action='store_true',
+        help='Create public shareable link'
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=7860,
+        help='Server port (default: 7860)'
+    )
+    
+    args = parser.parse_args()
+    
+    try:
+        chat = ChatInterface(checkpoint_path=args.checkpoint)
+        chat.load_model()
+        chat.launch(share=args.share, server_port=args.port)
+    except KeyboardInterrupt:
+        print("\\n\\nChat interface stopped.")
+    except Exception as e:
+        print(f"\\nERROR: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
+`;
+    }
+
     private getDeployScriptTemplate(): string {
         return `#!/usr/bin/env python3
 """
@@ -2453,6 +3001,9 @@ if __name__ == '__main__':
         lines.push('tensorboard>=2.13.0');
         lines.push('matplotlib>=3.7.0');
         lines.push('');
+        lines.push('# Interactive chat interface');
+        lines.push('gradio>=4.0.0');
+        lines.push('');
 
         // Add plugin-specific dependencies
         if (config.plugins.includes('wandb')) {
@@ -2810,9 +3361,7 @@ This tokenizes and prepares your data. You'll see:
 ### Step 5: Start Training
 
 \`\`\`bash
-# Basic training
 python training/train.py
-
 \`\`\`
 
 **Training will show:**
@@ -2821,32 +3370,54 @@ python training/train.py
 - Tokens per second
 - Estimated time remaining
 
-### Step 6: Monitor Training
+**After training completes**, you'll see a menu with options:
+1. **Continue training** - Add more training steps
+2. **Launch chat interface** - Test your model in a web UI
+3. **Exit** - Finish and exit
+
+### Step 6: Test Your Model (Post-Training Chat)
+
+After training, select option 2 to launch the interactive chat interface:
+
+\`\`\`bash
+# Or launch manually anytime:
+python chat_interface.py
+\`\`\`
+
+This opens a web interface where you can:
+- Chat with your trained model in real-time
+- Adjust generation parameters (temperature, top-k, top-p)
+- Test different prompts and see responses
+- Clear conversation and start fresh
+
+The interface automatically loads your best checkpoint and runs at http://localhost:7860
+
+### Step 7: Monitor Training
 
 Watch for these indicators:
 
-✅ **Good Training:**
+**Good Training:**
 - Loss steadily decreasing
 - Perplexity: 5-20 (depends on data)
 - No warnings
 
-⚠️ **Potential Issues:**
+**Potential Issues:**
 - Perplexity < 1.5: Possible overfitting
 - Loss not decreasing: Check learning rate
 - "Model too large" warning: Add more data or use smaller template
 
-### Step 7: Evaluate Your Model
+### Step 8: Evaluate Your Model (Optional)
 
 \`\`\`bash
 python evaluation/evaluate.py --checkpoint checkpoints/checkpoint-best.pt
 \`\`\`
 
-You'll see:
+Output includes:
 - Perplexity score
 - Loss metrics
 - Performance statistics
 
-### Step 8: Generate Text
+### Step 9: Generate Text (Optional)
 
 \`\`\`bash
 python evaluation/generate.py \\
@@ -2860,7 +3431,7 @@ python evaluation/generate.py \\
 - 0.7-0.9: Balanced, creative
 - 1.0-1.5: Very creative, diverse
 
-### Step 9: Interactive Chat
+### Step 10: Terminal Chat (Optional)
 
 \`\`\`bash
 python chat.py --checkpoint checkpoints/checkpoint-best.pt
