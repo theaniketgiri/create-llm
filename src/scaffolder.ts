@@ -1913,86 +1913,219 @@ class ChatInterface:
         return input_ids
     
     def create_interface(self):
-        """Create Gradio interface"""
-        with gr.Blocks(title="LLM Chat Interface", theme=gr.themes.Soft()) as interface:
-            gr.Markdown("# Chat with Your Trained Model")
-            gr.Markdown(
-                f"**Checkpoint**: {Path(self.checkpoint_path).name}  |  "
-                f"**Step**: {self.model_info.get('step', 'unknown')}  |  "
-                f"**Parameters**: {self.model_info.get('parameters', 0):,}  |  "
-                f"**Device**: {self.device}"
-            )
+        """Create Gradio interface with modern dark theme"""
+        
+        # Custom CSS for dark theme and modern styling
+        custom_css = """
+        .gradio-container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+        }
+        .contain {
+            max-width: 900px !important;
+            margin: auto !important;
+        }
+        #greeting-box {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+        #greeting-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        #greeting-subtitle {
+            font-size: 18px;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+        #model-info {
+            font-size: 14px;
+            color: #808080;
+            margin-top: 10px;
+        }
+        .prompt-card {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+        }
+        .prompt-card:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(76, 175, 80, 0.5) !important;
+        }
+        #chatbot {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 16px !important;
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+        #msg-input {
+            border-radius: 24px !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #ffffff !important;
+        }
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-radius: 12px !important;
+            padding: 20px !important;
+            margin-top: 20px !important;
+        }
+        """
+        
+        with gr.Blocks(
+            title="Chat with Your Model",
+            theme=gr.themes.Soft(
+                primary_hue="green",
+                secondary_hue="blue",
+                neutral_hue="slate",
+            ),
+            css=custom_css
+        ) as interface:
             
+            # Greeting section (shown when no conversation)
+            with gr.Column(elem_id="greeting-box"):
+                gr.HTML("""
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 20px; 
+                                    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); 
+                                    border-radius: 50%; display: flex; align-items: center; 
+                                    justify-content: center; box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);">
+                            <span style="font-size: 40px;">🤖</span>
+                        </div>
+                        <h1 id="greeting-title">Good evening!</h1>
+                        <p id="greeting-subtitle">How can I help you today?</p>
+                    </div>
+                """)
+                
+                gr.Markdown(
+                    f'<p id="model-info">Model: {Path(self.checkpoint_path).name} | '
+                    f'Step: {self.model_info.get("step", "unknown")} | '
+                    f'Parameters: {self.model_info.get("parameters", 0):,} | '
+                    f'Device: {self.device}</p>',
+                    elem_id="model-info"
+                )
+            
+            # Prompt suggestions
+            with gr.Row():
+                prompt1 = gr.Button(
+                    "💡 Get creative ideas\\nBrainstorm innovative solutions",
+                    elem_classes="prompt-card",
+                    scale=1
+                )
+                prompt2 = gr.Button(
+                    "✍️ Write content\\nGenerate articles or stories",
+                    elem_classes="prompt-card",
+                    scale=1
+                )
+                prompt3 = gr.Button(
+                    "🔍 Analyze text\\nSummarize or explain concepts",
+                    elem_classes="prompt-card",
+                    scale=1
+                )
+                prompt4 = gr.Button(
+                    "💻 Code assistance\\nHelp with programming tasks",
+                    elem_classes="prompt-card",
+                    scale=1
+                )
+            
+            # Chat interface
             chatbot = gr.Chatbot(
-                label="Conversation",
-                height=500,
+                label="",
+                height=450,
                 show_copy_button=True,
-                type="tuples"
+                type="tuples",
+                elem_id="chatbot",
+                avatar_images=(None, "🤖"),
+                bubble_full_width=False
             )
             
+            # Input area
             with gr.Row():
                 msg = gr.Textbox(
-                    label="Your message",
-                    placeholder="Type your message here and press Enter...",
-                    lines=2,
-                    scale=4
+                    label="",
+                    placeholder="Ask me anything...",
+                    lines=1,
+                    scale=9,
+                    elem_id="msg-input",
+                    show_label=False
                 )
-                submit = gr.Button("Send", scale=1, variant="primary")
+                submit = gr.Button("➤", scale=1, variant="primary", size="lg")
             
-            with gr.Accordion("Generation Settings", open=False):
+            # Settings in collapsible panel
+            with gr.Accordion("⚙️ Generation Settings", open=False, elem_classes="settings-panel"):
                 with gr.Row():
                     temperature = gr.Slider(
                         minimum=0.1,
                         maximum=2.0,
                         value=0.8,
                         step=0.1,
-                        label="Temperature",
-                        info="Higher = more creative, Lower = more focused"
-                    )
-                    top_k = gr.Slider(
-                        minimum=1,
-                        maximum=100,
-                        value=50,
-                        step=1,
-                        label="Top-K",
-                        info="Number of top tokens to consider"
-                    )
-                
-                with gr.Row():
-                    top_p = gr.Slider(
-                        minimum=0.1,
-                        maximum=1.0,
-                        value=0.95,
-                        step=0.05,
-                        label="Top-P",
-                        info="Cumulative probability threshold"
+                        label="🌡️ Temperature",
+                        info="Higher = more creative"
                     )
                     max_length = gr.Slider(
                         minimum=10,
                         maximum=500,
                         value=100,
                         step=10,
-                        label="Max Length",
-                        info="Maximum tokens to generate"
+                        label="📏 Max Length",
+                        info="Maximum tokens"
                     )
+                
+                with gr.Row():
+                    top_k = gr.Slider(
+                        minimum=1,
+                        maximum=100,
+                        value=50,
+                        step=1,
+                        label="🎯 Top-K",
+                        info="Diversity control"
+                    )
+                    top_p = gr.Slider(
+                        minimum=0.1,
+                        maximum=1.0,
+                        value=0.95,
+                        step=0.05,
+                        label="🎲 Top-P",
+                        info="Nucleus sampling"
+                    )
+                
+                with gr.Row():
+                    clear = gr.Button("🗑️ Clear Conversation", variant="secondary")
+                    regenerate = gr.Button("🔄 Regenerate", variant="secondary")
             
-            with gr.Row():
-                clear = gr.Button("Clear Conversation")
-            
-            gr.Markdown("---")
-            gr.Markdown(
-                "**Tips**: Adjust temperature for creativity, use lower values for factual responses. "
-                "Press Ctrl+C in terminal to stop the server."
-            )
+            # Helper function for prompt buttons
+            def use_prompt(prompt_text):
+                return prompt_text.split("\\n")[0].replace("💡 ", "").replace("✍️ ", "").replace("🔍 ", "").replace("💻 ", "")
             
             # Event handlers
-            submit_event = submit.click(
+            prompt1.click(
+                lambda: "Help me brainstorm creative ideas",
+                outputs=msg
+            )
+            prompt2.click(
+                lambda: "Write a short story about",
+                outputs=msg
+            )
+            prompt3.click(
+                lambda: "Explain the concept of",
+                outputs=msg
+            )
+            prompt4.click(
+                lambda: "Help me write code for",
+                outputs=msg
+            )
+            
+            submit.click(
                 self.generate_response,
                 inputs=[msg, chatbot, temperature, top_k, top_p, max_length],
                 outputs=[msg, chatbot]
             )
             
-            msg_event = msg.submit(
+            msg.submit(
                 self.generate_response,
                 inputs=[msg, chatbot, temperature, top_k, top_p, max_length],
                 outputs=[msg, chatbot]
