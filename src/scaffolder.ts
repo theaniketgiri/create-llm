@@ -3418,9 +3418,9 @@ Good luck with your language model training!
         const hardware = template.config.hardware.recommended_gpu;
         const trainingTime = template.config.hardware.estimated_training_time;
         const cpuFriendly = template.config.hardware.can_run_on_cpu;
-        const minData = config.template === 'nano' ? '100+' : 
-                       config.template === 'tiny' ? '1,000+' :
-                       config.template === 'small' ? '10,000+' : '100,000+';
+        const minData = config.template === 'nano' ? '100+' :
+            config.template === 'tiny' ? '1,000+' :
+                config.template === 'small' ? '10,000+' : '100,000+';
 
         return `# ${config.projectName}
 
