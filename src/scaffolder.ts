@@ -51,8 +51,6 @@ export class ScaffolderEngine {
             'tokenizer',
             'training',
             'training/callbacks',
-            'training/dashboard',
-            'training/dashboard/templates',
             'evaluation',
             'checkpoints',
             'logs',
@@ -122,7 +120,6 @@ export class ScaffolderEngine {
         const { PythonDatasetTemplates } = require('./python-dataset-templates');
         const { PythonCallbackTemplates } = require('./python-callback-templates');
         const { PythonTrainerTemplates } = require('./python-trainer-templates');
-        const { PythonDashboardTemplates } = require('./python-dashboard-templates');
 
         const { PythonPluginTemplates } = require('./python-plugin-templates');
         const { PythonErrorTemplates } = require('./python-error-templates');
@@ -133,7 +130,6 @@ export class ScaffolderEngine {
         this.createFile('data/__init__.py', PythonDatasetTemplates.getDataInit());
         this.createFile('training/__init__.py', PythonTrainerTemplates.getTrainingInit());
         this.createFile('training/callbacks/__init__.py', PythonCallbackTemplates.getCallbacksInit());
-        this.createFile('training/dashboard/__init__.py', PythonDashboardTemplates.getDashboardInit());
         this.createFile('evaluation/__init__.py', '');
         this.createFile('plugins/__init__.py', PythonPluginTemplates.getPluginsInit());
         this.createFile('utils/__init__.py', PythonErrorTemplates.getErrorInit());
@@ -154,11 +150,6 @@ export class ScaffolderEngine {
         this.createFile('training/callbacks/checkpoint.py', PythonCallbackTemplates.getCheckpointCallback());
         this.createFile('training/callbacks/logging.py', PythonCallbackTemplates.getLoggingCallback());
         this.createFile('training/callbacks/checkpoint_manager.py', PythonCallbackTemplates.getCheckpointManager());
-
-        // Create dashboard files
-        this.createFile('training/dashboard/dashboard_server.py', PythonDashboardTemplates.getDashboardServer());
-        this.createFile('training/dashboard/dashboard_callback.py', PythonDashboardTemplates.getDashboardCallback());
-        this.createFile('training/dashboard/templates/dashboard.html', PythonDashboardTemplates.getDashboardHTML());
 
         // Create plugin files
         this.createFile('plugins/base.py', PythonPluginTemplates.getPluginBase());
@@ -283,14 +274,14 @@ Examples:
   # Train with default config
   python training/train.py
   
+  # Train for specific number of steps
+  python training/train.py --max-steps 500
+  
   # Resume from checkpoint
   python training/train.py --resume checkpoints/checkpoint-5000.pt
   
   # Use custom config
   python training/train.py --config my-config.js
-  
-  # Enable live dashboard
-  python training/train.py --dashboard
         """
     )
     
@@ -306,16 +297,16 @@ Examples:
         help='Resume from checkpoint path'
     )
     parser.add_argument(
-        '--dashboard',
-        action='store_true',
-        help='Enable live training dashboard'
-    )
-    parser.add_argument(
         '--device',
         type=str,
         choices=['cuda', 'cpu', 'auto'],
         default='auto',
         help='Device to train on (default: auto)'
+    )
+    parser.add_argument(
+        '--max-steps',
+        type=int,
+        help='Maximum training steps (overrides config)'
     )
     
     return parser.parse_args()
@@ -389,7 +380,7 @@ def load_data(config: ConfigLoader, device: str):
     return train_loader, val_loader
 
 
-def create_callbacks(config: ConfigLoader, enable_dashboard: bool = False):
+def create_callbacks(config: ConfigLoader):
     """Create training callbacks"""
     callbacks = []
     
@@ -414,16 +405,6 @@ def create_callbacks(config: ConfigLoader, enable_dashboard: bool = False):
         verbose=True
     )
     callbacks.append(logging_callback)
-    
-    # Dashboard callback (optional)
-    if enable_dashboard:
-        try:
-            from training.dashboard import DashboardCallback
-            dashboard_callback = DashboardCallback(port=5000)
-            callbacks.append(dashboard_callback)
-            print("\\n📊 Dashboard enabled at http://localhost:5000")
-        except ImportError:
-            print("\\n⚠️  Dashboard dependencies not installed. Install with: pip install flask flask-socketio")
     
     return callbacks
 
@@ -470,7 +451,12 @@ def main():
             print(f"   Recommendation: Use smaller model or add more data\\n")
         
         # Create callbacks
-        callbacks = create_callbacks(config, enable_dashboard=args.dashboard)
+        callbacks = create_callbacks(config)
+        
+        # Override max_steps if provided via CLI
+        if args.max_steps is not None:
+            config.config['training']['max_steps'] = args.max_steps
+            print(f"\\nOverriding max_steps from CLI: {args.max_steps}")
         
         # Create trainer
         print("\\nInitializing trainer...")
@@ -2467,10 +2453,6 @@ if __name__ == '__main__':
         lines.push('tensorboard>=2.13.0');
         lines.push('matplotlib>=3.7.0');
         lines.push('');
-        lines.push('# Live training dashboard');
-        lines.push('flask>=2.3.0');
-        lines.push('flask-socketio>=5.3.0');
-        lines.push('');
 
         // Add plugin-specific dependencies
         if (config.plugins.includes('wandb')) {
@@ -2831,9 +2813,6 @@ This tokenizes and prepares your data. You'll see:
 # Basic training
 python training/train.py
 
-# With live dashboard (recommended)
-python training/train.py --dashboard
-# Then open http://localhost:5000 in your browser
 \`\`\`
 
 **Training will show:**
@@ -2927,9 +2906,6 @@ ${config.projectName}/
 │   │   ├── checkpoint.py      # Checkpoint management
 │   │   ├── logging.py         # TensorBoard logging
 │   │   └── checkpoint_manager.py
-│   └── dashboard/             # Live training dashboard
-│       ├── dashboard_server.py
-│       └── templates/
 │
 ├── 📂 evaluation/
 │   ├── evaluate.py            # Model evaluation
@@ -2937,8 +2913,7 @@ ${config.projectName}/
 │
 ├── 📂 plugins/                # Optional integrations
 │   ├── wandb_plugin.py        # Weights & Biases
-│   ├── huggingface_plugin.py  # HuggingFace Hub
-│   └── synthex_plugin.py      # Synthetic data
+│   └── huggingface_plugin.py  # HuggingFace Hub
 │
 ├── 📂 checkpoints/            # Saved models (auto-generated)
 ├── 📂 logs/                   # Training logs (auto-generated)
@@ -3001,21 +2976,6 @@ If training was interrupted:
 \`\`\`bash
 python training/train.py --resume checkpoints/checkpoint-1000.pt
 \`\`\`
-
-### Live Dashboard
-
-Monitor training in real-time:
-
-\`\`\`bash
-python training/train.py --dashboard
-\`\`\`
-
-Then open http://localhost:5000 to see:
-- Real-time loss curves
-- Learning rate schedule
-- GPU memory usage
-- Tokens per second
-- Recent checkpoints
 
 ### Model Comparison
 

@@ -129,11 +129,6 @@ export class CLIPrompts {
             checked: false
           },
           {
-            name: `${chalk.bold('SynthexAI')} - ${chalk.gray('Synthetic data generation for training')}`,
-            value: 'synthex',
-            checked: false
-          },
-          {
             name: `${chalk.bold('HuggingFace')} - ${chalk.gray('Easy model sharing and deployment')}`,
             value: 'huggingface',
             checked: false

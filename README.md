@@ -97,7 +97,7 @@ You'll be prompted for:
 - Project name
 - Template (NANO, TINY, SMALL, BASE)
 - Tokenizer type (BPE, WordPiece, Unigram)
-- Optional plugins (WandB, HuggingFace, SynthexAI)
+- Optional plugins (WandB, HuggingFace)
 
 ### Quick Mode
 
@@ -355,7 +355,6 @@ module.exports = {
   plugins: [
     // 'wandb',
     // 'huggingface',
-    // 'synthex',
   ],
 };
 ```
