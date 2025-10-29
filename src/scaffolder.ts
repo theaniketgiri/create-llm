@@ -404,7 +404,8 @@ def create_callbacks(config: ConfigLoader):
     logging_callback = LoggingCallback(
         log_interval=logging_config.get('log_interval', 100),
         log_dir=logging_config.get('log_dir', 'logs'),
-        verbose=True
+        verbose=True,
+        use_tensorboard=logging_config.get('tensorboard', True)
     )
     callbacks.append(logging_callback)
     

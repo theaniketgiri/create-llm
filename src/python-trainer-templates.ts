@@ -313,6 +313,12 @@ class Trainer:
         
         print(f"Validation Loss: {avg_loss:.4f}, Perplexity: {perplexity:.2f}")
         
+        # Call validation end callbacks
+        val_metrics = {'perplexity': perplexity.item()}
+        for callback in self.callbacks:
+            if hasattr(callback, 'on_validation_end'):
+                callback.on_validation_end(self, self.global_step, avg_loss, val_metrics)
+        
         # Check for overfitting
         if perplexity < 1.1:
             print("\\n⚠️  WARNING: Perplexity < 1.1 indicates severe overfitting!")
