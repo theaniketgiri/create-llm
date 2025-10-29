@@ -1,0 +1,81 @@
+# Docker ignore file for create-llm
+# Prevents unnecessary files from being copied to Docker build context
+
+# Node modules and build artifacts
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker files (to avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+
+# Testing
+coverage/
+.coverage
+.pytest_cache/
+.tox/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Local development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Large model files and datasets (should be mounted as volumes)
+*.bin
+*.safetensors
+checkpoints/
+models/checkpoints/
+data/raw/
+wandb/
+
+# MacOS
+.AppleDouble
+.LSOverride

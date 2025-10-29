@@ -1,0 +1,108 @@
+# Docker Compose for Create-LLM Development and Training
+
+version: '3.8'
+
+services:
+  # Main create-llm service
+  create-llm:
+    build: .
+    image: create-llm:latest
+    container_name: create-llm
+    volumes:
+      - ./:/workspace
+      - llm-cache:/root/.cache
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TOKENIZERS_PARALLELISM=false
+    profiles: ["cli"]
+
+  # Training service with GPU support
+  training:
+    build: .
+    image: create-llm:latest
+    container_name: create-llm-training
+    volumes:
+      - ./:/workspace
+      - llm-cache:/root/.cache
+      - llm-models:/workspace/models/checkpoints
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TOKENIZERS_PARALLELISM=false
+      - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    profiles: ["training", "gpu"]
+
+  # Chat interface service
+  chat:
+    build: .
+    image: create-llm:latest
+    container_name: create-llm-chat
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./:/workspace
+      - llm-cache:/root/.cache
+      - llm-models:/workspace/models/checkpoints
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GRADIO_SERVER_NAME=0.0.0.0
+    command: ["chat"]
+    profiles: ["chat"]
+
+  # Development service for testing
+  dev:
+    build: .
+    image: create-llm:latest
+    container_name: create-llm-dev
+    volumes:
+      - ./:/workspace
+      - llm-cache:/root/.cache
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_ENV=development
+    command: ["shell"]
+    stdin_open: true
+    tty: true
+    profiles: ["dev"]
+
+  # Jupyter notebook service for experimentation
+  jupyter:
+    build: .
+    image: create-llm:latest
+    container_name: create-llm-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/workspace
+      - llm-cache:/root/.cache
+      - llm-models:/workspace/models/checkpoints
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - JUPYTER_ENABLE_LAB=yes
+    command: >
+      bash -c "
+        pip install jupyter jupyterlab &&
+        jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --token=''
+      "
+    profiles: ["jupyter"]
+
+volumes:
+  llm-cache:
+    driver: local
+  llm-models:
+    driver: local
+
+networks:
+  default:
+    name: create-llm-network
