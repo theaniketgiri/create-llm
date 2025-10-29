@@ -247,6 +247,7 @@ Trains the LLM model with full configuration support
 import argparse
 import sys
 import os
+import json
 import torch
 from pathlib import Path
 
@@ -436,6 +437,36 @@ def main():
         model = load_model_from_config(args.config)
         num_params = model.count_parameters()
         print(f"✓ Model loaded: {num_params:,} parameters")
+        
+        # Validate tokenizer and vocab size
+        print("\\nValidating model configuration...")
+        tokenizer_path = Path('tokenizer/tokenizer.json')
+        if not tokenizer_path.exists():
+            print("❌ Tokenizer not found!")
+            print("   Please train tokenizer first: python tokenizer/train.py --data data/raw/")
+            sys.exit(1)
+        
+        try:
+            with open(tokenizer_path, 'r', encoding='utf-8') as f:
+                tokenizer_data = json.load(f)
+                tokenizer_vocab_size = len(tokenizer_data['model']['vocab'])
+            
+            model_vocab_size = model.config.vocab_size
+            
+            if tokenizer_vocab_size != model_vocab_size:
+                print(f"❌ Vocabulary size mismatch!")
+                print(f"   Model vocab size: {model_vocab_size:,}")
+                print(f"   Tokenizer vocab size: {tokenizer_vocab_size:,}")
+                print(f"\\n   This will cause training to fail or produce poor results.")
+                print(f"   The model was auto-corrected during loading, but there may be")
+                print(f"   a configuration issue. Please verify llm.config.js matches your tokenizer.")
+                sys.exit(1)
+            
+            print(f"✓ Vocabulary sizes match: {model_vocab_size:,}")
+            
+        except Exception as e:
+            print(f"❌ Error validating tokenizer: {e}")
+            sys.exit(1)
         
         # Load data
         print()
@@ -3664,6 +3695,35 @@ module.exports = {
 - \`dropout\`: Increase if overfitting (0.2-0.4)
 - \`max_steps\`: Increase for better quality
 
+### 📖 Understanding Vocabulary Size
+
+**What is vocab_size?**
+- The number of unique tokens your model can understand
+- Must match your trained tokenizer's vocabulary
+- Automatically detected and synchronized by the system
+
+**How it works:**
+1. You train a tokenizer on your data → creates vocabulary
+2. System reads actual vocab size from \`tokenizer/tokenizer.json\`
+3. Model is initialized with the correct vocab size
+4. Training validates that everything matches
+
+**Important:**
+- ✅ **DO:** Let the system auto-detect vocab size (default behavior)
+- ✅ **DO:** Train tokenizer before training model
+- ❌ **DON'T:** Manually override vocab_size unless you know what you're doing
+- ❌ **DON'T:** Change vocab_size after training starts
+
+**Typical vocab sizes:**
+- Small datasets (shakespeare.txt): 3,000-10,000 tokens
+- Medium datasets: 10,000-32,000 tokens
+- Large datasets: 32,000-50,000 tokens
+
+**If you see "vocab size mismatch":**
+- This is automatically corrected
+- No action needed
+- The model will use the tokenizer's actual vocab size
+
 ---
 
 ## 💡 Training Tips
@@ -3729,6 +3789,47 @@ ${config.plugins.length > 0 ? `### Enabled Plugins\n\n${config.plugins.map(p => 
 
 ### "Vocab size mismatch detected"
 ✅ **This is normal!** The tool auto-detects and uses the correct vocab size from your tokenizer.
+
+**What it means:**
+- Your \`llm.config.js\` has a different vocab_size than your trained tokenizer
+- The system automatically uses the tokenizer's actual vocabulary size
+- This prevents training issues and poor generation quality
+
+**No action needed** - the mismatch is automatically corrected!
+
+### Repetitive text generation ("which which which...")
+❌ **Vocabulary mismatch issue**
+
+**Symptoms:**
+- Model generates the same word repeatedly
+- Output looks like: "which which which which..."
+- Happens especially with small datasets (e.g., shakespeare.txt)
+
+**Root Cause:**
+- Tokenizer vocabulary size doesn't match model embedding layer
+- Model can't properly learn token representations
+
+**Solution:**
+1. **Check vocab sizes match:**
+   \`\`\`bash
+   # The training script validates this automatically
+   python training/train.py
+   \`\`\`
+
+2. **If you see a mismatch error:**
+   - The model was auto-corrected during loading
+   - Training should work correctly
+   - If issues persist, retrain from scratch
+
+3. **For existing checkpoints with wrong vocab:**
+   - Cannot be fixed - must retrain
+   - Delete checkpoints/ directory
+   - Retrain with correct vocab size
+
+**Prevention:**
+- Always train tokenizer before training model
+- Let the system auto-detect vocab size (don't override manually)
+- Verify "✓ Vocabulary sizes match" message during training
 
 ### "Position embedding index error" or sequences too long
 ✅ **Automatically handled!** Sequences exceeding max_length are truncated with warnings.

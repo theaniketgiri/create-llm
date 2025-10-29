@@ -224,6 +224,16 @@ class GPTModel(nn.Module):
             probs = F.softmax(logits, dim=-1)
             next_token = torch.multinomial(probs, num_samples=1)
             
+            # Validate token is in vocabulary range
+            if next_token.item() >= self.config.vocab_size:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    f"Generated token {next_token.item()} exceeds vocab size "
+                    f"{self.config.vocab_size}. Clamping to valid range."
+                )
+                next_token = torch.clamp(next_token, 0, self.config.vocab_size - 1)
+            
             # Append to sequence
             input_ids = torch.cat([input_ids, next_token], dim=1)
         
@@ -301,9 +311,15 @@ def create_nano_model(model_config=None):
     - Any CPU
     - 2GB RAM minimum
     - Training time: 1-2 minutes
+    
+    Note:
+    - vocab_size should match your trained tokenizer's vocabulary size
+    - The default value (5000) is overridden by load_model_from_config()
+      to use the actual tokenizer vocabulary size
+    - Mismatched vocab sizes cause poor generation quality
     """
     config = {
-        'vocab_size': 5000,
+        'vocab_size': 5000,  # Will be overridden by actual tokenizer vocab
         'max_length': 256,
         'layers': 3,
         'heads': 4,
@@ -311,7 +327,7 @@ def create_nano_model(model_config=None):
         'dropout': 0.1,
     }
     
-    # Override with provided config (e.g., actual vocab size)
+    # Override with provided config (e.g., actual vocab size from tokenizer)
     if model_config:
         config.update(model_config)
     
@@ -351,9 +367,15 @@ def create_tiny_model(model_config=None):
     - CPU or basic GPU
     - 4GB RAM minimum
     - Training time: 5-15 minutes
+    
+    Note:
+    - vocab_size should match your trained tokenizer's vocabulary size
+    - The default value (10000) is overridden by load_model_from_config()
+      to use the actual tokenizer vocabulary size
+    - Mismatched vocab sizes cause poor generation quality
     """
     config = {
-        'vocab_size': 10000,
+        'vocab_size': 10000,  # Will be overridden by actual tokenizer vocab
         'max_length': 512,
         'layers': 4,
         'heads': 4,
@@ -361,7 +383,7 @@ def create_tiny_model(model_config=None):
         'dropout': 0.2,
     }
     
-    # Override with provided config (e.g., actual vocab size)
+    # Override with provided config (e.g., actual vocab size from tokenizer)
     if model_config:
         config.update(model_config)
     
@@ -401,9 +423,15 @@ def create_small_model(model_config=None):
     - NVIDIA RTX 3060 (12GB) or better
     - 16GB RAM minimum
     - Training time: 2-6 hours
+    
+    Note:
+    - vocab_size should match your trained tokenizer's vocabulary size
+    - The default value (32000) is overridden by load_model_from_config()
+      to use the actual tokenizer vocabulary size
+    - Mismatched vocab sizes cause poor generation quality
     """
     config = {
-        'vocab_size': 32000,
+        'vocab_size': 32000,  # Will be overridden by actual tokenizer vocab
         'max_length': 1024,
         'layers': 12,
         'heads': 12,
@@ -411,7 +439,7 @@ def create_small_model(model_config=None):
         'dropout': 0.1,
     }
     
-    # Override with provided config (e.g., actual vocab size)
+    # Override with provided config (e.g., actual vocab size from tokenizer)
     if model_config:
         config.update(model_config)
     
@@ -451,9 +479,15 @@ def create_base_model(model_config=None):
     - NVIDIA A100 (40GB) or 2x RTX 4090
     - 64GB RAM minimum
     - Training time: 1-3 days
+    
+    Note:
+    - vocab_size should match your trained tokenizer's vocabulary size
+    - The default value (50000) is overridden by load_model_from_config()
+      to use the actual tokenizer vocabulary size
+    - Mismatched vocab sizes cause poor generation quality
     """
     config = {
-        'vocab_size': 50000,
+        'vocab_size': 50000,  # Will be overridden by actual tokenizer vocab
         'max_length': 2048,
         'layers': 24,
         'heads': 16,
@@ -461,7 +495,7 @@ def create_base_model(model_config=None):
         'dropout': 0.1,
     }
     
-    # Override with provided config (e.g., actual vocab size)
+    # Override with provided config (e.g., actual vocab size from tokenizer)
     if model_config:
         config.update(model_config)
     
@@ -776,6 +810,39 @@ class ConfigLoader:
         return self.config.get('plugins', [])
 
 
+def get_tokenizer_vocab_size(tokenizer_path: Path) -> Optional[int]:
+    """
+    Read vocabulary size from tokenizer.json
+    
+    Args:
+        tokenizer_path: Path to tokenizer.json file
+        
+    Returns:
+        Vocabulary size if tokenizer exists and is valid, None otherwise
+    """
+    if not tokenizer_path.exists():
+        return None
+    
+    try:
+        with open(tokenizer_path, 'r', encoding='utf-8') as f:
+            tokenizer_data = json.load(f)
+            
+        # Extract vocab from tokenizer data
+        if 'model' not in tokenizer_data:
+            raise ValueError("Invalid tokenizer format: missing 'model' key")
+        
+        if 'vocab' not in tokenizer_data['model']:
+            raise ValueError("Invalid tokenizer format: missing 'vocab' key in model")
+        
+        vocab_size = len(tokenizer_data['model']['vocab'])
+        return vocab_size
+        
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Corrupted tokenizer file: {e}")
+    except Exception as e:
+        raise ValueError(f"Error reading tokenizer: {e}")
+
+
 def load_model_from_config(config_path: str = 'llm.config.js'):
     """Load model based on config file"""
     from .architectures import nano, tiny, small, base, gpt
@@ -787,22 +854,25 @@ def load_model_from_config(config_path: str = 'llm.config.js'):
     
     # Auto-detect vocab size from tokenizer if available
     tokenizer_path = Path('tokenizer/tokenizer.json')
-    if tokenizer_path.exists():
-        try:
-            with open(tokenizer_path, 'r', encoding='utf-8') as f:
-                tokenizer_data = json.load(f)
-                actual_vocab_size = len(tokenizer_data['model']['vocab'])
-                config_vocab_size = model_config.get('vocab_size', 32000)
-                
-                if actual_vocab_size != config_vocab_size:
-                    print(f"\\n⚠️  Vocab size mismatch detected!")
-                    print(f"   Config: {config_vocab_size:,} | Tokenizer: {actual_vocab_size:,}")
-                    print(f"   Using actual tokenizer vocab size: {actual_vocab_size:,}")
-                    model_config['vocab_size'] = actual_vocab_size
-                else:
-                    print(f"✓ Vocab size: {actual_vocab_size:,}")
-        except Exception as e:
-            print(f"⚠️  Could not read tokenizer vocab size: {e}")
+    config_vocab_size = model_config.get('vocab_size', 32000)
+    
+    try:
+        actual_vocab_size = get_tokenizer_vocab_size(tokenizer_path)
+        
+        if actual_vocab_size is not None:
+            if actual_vocab_size != config_vocab_size:
+                print(f"\\n⚠️  Vocab size mismatch detected!")
+                print(f"   Config: {config_vocab_size:,} | Tokenizer: {actual_vocab_size:,}")
+                print(f"   Using actual tokenizer vocab size: {actual_vocab_size:,}")
+                model_config['vocab_size'] = actual_vocab_size
+            else:
+                print(f"✓ Vocab size: {actual_vocab_size:,}")
+        else:
+            print(f"⚠️  Tokenizer not found, using config vocab size: {config_vocab_size:,}")
+            
+    except ValueError as e:
+        print(f"⚠️  Error reading tokenizer: {e}")
+        print(f"   Using config vocab size: {config_vocab_size:,}")
     
     # Get model size
     size = model_config.get('size', 'small')
