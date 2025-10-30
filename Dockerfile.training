@@ -1,7 +1,7 @@
 # GPU-optimized training Docker image
 # Use this for training models with CUDA support
 
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
+FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
 # Prevent interactive prompts during apt install
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,7 +26,7 @@ RUN ln -sf /usr/bin/python3.11 /usr/bin/python
 RUN python -m pip install --upgrade pip
 
 # Install PyTorch with CUDA support
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 # Install training dependencies
 RUN pip install --no-cache-dir \
