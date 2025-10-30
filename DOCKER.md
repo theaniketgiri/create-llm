@@ -2,6 +2,20 @@
 
 This guide shows you how to use create-llm with Docker, eliminating the need for local Python/Node.js installations.
 
+## Important: Interactive Mode
+
+When creating projects with create-llm, you **must** use the `-it` flags:
+
+```bash
+docker run --rm -it -v $(pwd):/workspace create-llm:latest my-project 
+```
+
+- `-i` (interactive): Keeps STDIN open for user input
+- `-t` (TTY): Allocates a pseudo-terminal for interactive prompts
+- `--rm`: Automatically removes the container after it exits
+
+Without `-it`, the container will hang at interactive prompts and won't complete project creation.
+
 ## Quick Start
 
 ### 🚀 One-Command Setup (Recommended)
@@ -34,12 +48,11 @@ docker build -t create-llm .
 ### 2. Create a New Project
 
 ```bash
-# Create a new directory for your project
-mkdir my-llm-project
-cd my-llm-project
+# Create a new LLM project using Docker (interactive mode required)
+docker run --rm -it -v $(pwd):/workspace create-llm:latest my-awesome-llm 
 
-# Create a new LLM project using Docker
-docker run -it -v $(pwd):/workspace create-llm scaffold my-awesome-llm --template tiny
+# Note: The -it flags are required for interactive prompts
+# --rm automatically removes the container after it exits
 ```
 
 ### 3. Train Your Model
@@ -49,17 +62,17 @@ docker run -it -v $(pwd):/workspace create-llm scaffold my-awesome-llm --templat
 cd my-awesome-llm
 
 # Start training (with GPU support if available)
-docker run --gpus all -v $(pwd):/workspace create-llm train
+docker run --rm --gpus all -v $(pwd):/workspace create-llm:latest python training/train.py
 
 # Or without GPU
-docker run -v $(pwd):/workspace create-llm train
+docker run --rm -v $(pwd):/workspace create-llm:latest python training/train.py
 ```
 
 ### 4. Chat with Your Model
 
 ```bash
 # Start interactive chat interface
-docker run -p 7860:7860 -v $(pwd):/workspace create-llm chat
+docker run --rm -p 7860:7860 -v $(pwd):/workspace create-llm:latest python chat.py
 
 # Open http://localhost:7860 in your browser
 ```
@@ -71,11 +84,11 @@ We provide three specialized Docker images:
 ### 1. All-in-One Image (Recommended)
 ```bash
 # Build
-docker build -t create-llm .
+docker build -t create-llm:latest .
 
 # Usage: Scaffolding + Training + Chat
-docker run -v $(pwd):/workspace create-llm scaffold my-project
-docker run --gpus all -v $(pwd):/workspace create-llm train
+docker run --rm -it -v $(pwd):/workspace create-llm:latest my-project --template nano --tokenizer bpe --yes
+docker run --rm --gpus all -v $(pwd)/my-project:/workspace create-llm:latest python training/train.py
 ```
 
 ### 2. CLI-Only Image (Lightweight)
@@ -83,8 +96,8 @@ docker run --gpus all -v $(pwd):/workspace create-llm train
 # Build
 docker build -f Dockerfile.cli -t create-llm:cli .
 
-# Usage: Project scaffolding only
-docker run -v $(pwd):/workspace create-llm:cli my-project --template nano
+# Usage: Project scaffolding only (requires -it for interactive prompts)
+docker run --rm -it -v $(pwd):/workspace create-llm:cli my-project --template nano --tokenizer bpe --yes
 ```
 
 ### 3. Training-Only Image (GPU Optimized)
@@ -93,7 +106,7 @@ docker run -v $(pwd):/workspace create-llm:cli my-project --template nano
 docker build -f Dockerfile.training -t create-llm:training .
 
 # Usage: Training existing projects
-docker run --gpus all -v $(pwd):/workspace create-llm:training python training/train.py
+docker run --rm --gpus all -v $(pwd):/workspace create-llm:training python training/train.py
 ```
 
 ## Docker Compose (Recommended)
@@ -132,8 +145,8 @@ docker-compose --profile jupyter up jupyter
 # 1. Create project directory
 mkdir llm-experiments && cd llm-experiments
 
-# 2. Create new project
-docker run -it -v $(pwd):/workspace create-llm scaffold sentiment-analyzer --template small
+# 2. Create new project (interactive mode required)
+docker run --rm -it -v $(pwd):/workspace create-llm:latest sentiment-analyzer --template small --tokenizer bpe --yes
 
 # 3. Navigate to project
 cd sentiment-analyzer
@@ -142,35 +155,35 @@ cd sentiment-analyzer
 # Place text files in data/raw/
 
 # 5. Start training with monitoring
-docker run --gpus all -p 6006:6006 -v $(pwd):/workspace create-llm train --tensorboard
+docker run --rm --gpus all -p 6006:6006 -v $(pwd):/workspace create-llm:latest python training/train.py --tensorboard
 
 # 6. Monitor training (open another terminal)
 # TensorBoard will be available at http://localhost:6006
 
 # 7. Test your model
-docker run -p 7860:7860 -v $(pwd):/workspace create-llm chat
+docker run --rm -p 7860:7860 -v $(pwd):/workspace create-llm:latest python chat.py
 
 # 8. Evaluate performance
-docker run -v $(pwd):/workspace create-llm evaluate
+docker run --rm -v $(pwd):/workspace create-llm:latest python evaluation/evaluate.py
 
 # 9. Deploy to HuggingFace
-docker run -it -v $(pwd):/workspace create-llm deploy --platform huggingface
+docker run --rm -it -v $(pwd):/workspace create-llm:latest python deploy.py --platform huggingface
 ```
 
 ### GPU Training with Resource Limits
 
 ```bash
 # Limit GPU memory usage
-docker run --gpus all \
+docker run --rm --gpus all \
   -e CUDA_VISIBLE_DEVICES=0 \
   -v $(pwd):/workspace \
-  create-llm train --max-gpu-memory 8GB
+  create-llm:latest python training/train.py --max-gpu-memory 8GB
 
 # Use multiple GPUs
-docker run --gpus all \
+docker run --rm --gpus all \
   -e CUDA_VISIBLE_DEVICES=0,1 \
   -v $(pwd):/workspace \
-  create-llm train --distributed
+  create-llm:latest python training/train.py --distributed
 ```
 
 ### Batch Processing Multiple Projects
@@ -185,10 +198,10 @@ for i in "${!projects[@]}"; do
   template="${templates[$i]}"
   
   echo "Creating $project with $template template..."
-  docker run -v $(pwd):/workspace create-llm scaffold $project --template $template
+  docker run --rm -it -v $(pwd):/workspace create-llm:latest $project --template $template --tokenizer bpe --yes
   
   echo "Training $project..."
-  docker run --gpus all -v $(pwd)/$project:/workspace create-llm train
+  docker run --rm --gpus all -v $(pwd)/$project:/workspace create-llm:latest python training/train.py
 done
 ```
 
@@ -210,12 +223,12 @@ done
 ### Example with All Mounts
 
 ```bash
-docker run --gpus all \
+docker run --rm --gpus all \
   -v $(pwd):/workspace \
   -v llm-cache:/root/.cache \
   -v llm-models:/workspace/models/checkpoints \
   -v llm-datasets:/workspace/data \
-  create-llm train
+  create-llm:latest python training/train.py
 ```
 
 ## Environment Variables
@@ -240,12 +253,12 @@ docker run --gpus all \
 ### Example with Environment Variables
 
 ```bash
-docker run --gpus all \
+docker run --rm --gpus all \
   -e PYTHONUNBUFFERED=1 \
   -e CUDA_VISIBLE_DEVICES=0 \
   -e LLM_BATCH_SIZE=8 \
   -v $(pwd):/workspace \
-  create-llm train
+  create-llm:latest python training/train.py
 ```
 
 ## Port Mappings
@@ -271,43 +284,52 @@ docker run --gpus all \
 1. **Permission Issues**
    ```bash
    # Fix file permissions
-   docker run -v $(pwd):/workspace create-llm shell
+   docker run --rm -it -v $(pwd):/workspace create-llm:latest /bin/bash
    chown -R $(id -u):$(id -g) /workspace
    ```
 
 2. **GPU Not Detected**
    ```bash
    # Check NVIDIA Docker runtime
-   docker run --gpus all nvidia/cuda:12.1-base nvidia-smi
+   docker run --rm --gpus all nvidia/cuda:12.1-base nvidia-smi
    
    # Verify in create-llm
-   docker run --gpus all -v $(pwd):/workspace create-llm python -c "import torch; print(torch.cuda.is_available())"
+   docker run --rm --gpus all -v $(pwd):/workspace create-llm:latest python -c "import torch; print(torch.cuda.is_available())"
    ```
 
 3. **Out of Memory**
    ```bash
    # Reduce batch size
-   docker run --gpus all -v $(pwd):/workspace create-llm train --batch-size 4
+   docker run --rm --gpus all -v $(pwd):/workspace create-llm:latest python training/train.py --batch-size 4
    
    # Enable gradient checkpointing
-   docker run --gpus all -v $(pwd):/workspace create-llm train --gradient-checkpointing
+   docker run --rm --gpus all -v $(pwd):/workspace create-llm:latest python training/train.py --gradient-checkpointing
    ```
 
 4. **Slow Training**
    ```bash
    # Use optimized Docker image
    docker build -f Dockerfile.training -t create-llm:fast .
-   docker run --gpus all -v $(pwd):/workspace create-llm:fast python training/train.py
+   docker run --rm --gpus all -v $(pwd):/workspace create-llm:fast python training/train.py
+   ```
+
+5. **Interactive Prompts Not Working**
+   ```bash
+   # Always use -it flags for interactive commands
+   docker run --rm -it -v $(pwd):/workspace create-llm:latest my-project --template nano --tokenizer bpe --yes
+   
+   # The -i flag keeps STDIN open
+   # The -t flag allocates a pseudo-TTY
    ```
 
 ### Debugging
 
 ```bash
 # Start interactive shell
-docker run -it -v $(pwd):/workspace create-llm shell
+docker run --rm -it -v $(pwd):/workspace create-llm:latest /bin/bash
 
 # Check system resources
-docker run --gpus all -v $(pwd):/workspace create-llm python -c "
+docker run --rm --gpus all -v $(pwd):/workspace create-llm:latest python -c "
 import torch
 import psutil
 print(f'GPUs: {torch.cuda.device_count()}')
@@ -343,13 +365,13 @@ docker logs create-llm-training
 
 ```bash
 # Limit CPU and memory usage
-docker run --cpus="4.0" --memory="16g" \
-  -v $(pwd):/workspace create-llm train
+docker run --rm --cpus="4.0" --memory="16g" \
+  -v $(pwd):/workspace create-llm:latest python training/train.py
 
 # Set GPU memory fraction
-docker run --gpus all \
+docker run --rm --gpus all \
   -e PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128 \
-  -v $(pwd):/workspace create-llm train
+  -v $(pwd):/workspace create-llm:latest python training/train.py
 ```
 
 ## Integration Examples
@@ -371,12 +393,12 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Build Docker image
-      run: docker build -t create-llm .
+      run: docker build -t create-llm:latest .
     
     - name: Train model
       run: |
-        docker run -v ${{ github.workspace }}:/workspace \
-          create-llm train --max-steps 1000
+        docker run --rm -v ${{ github.workspace }}:/workspace \
+          create-llm:latest python training/train.py --max-steps 1000
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
