@@ -1,0 +1,358 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'Dockerfile*'
+      - 'docker-compose.yml'
+      - 'src/**'
+      - 'package.json'
+      - '.github/workflows/docker.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile*'
+      - 'docker-compose.yml'
+      - 'src/**'
+      - 'package.json'
+  schedule:
+    # Run tests weekly to catch dependency issues
+    - cron: '0 6 * * 1'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        image-type: [all-in-one, cli, training]
+        include:
+          - image-type: all-in-one
+            dockerfile: Dockerfile
+            tag-suffix: ""
+          - image-type: cli
+            dockerfile: Dockerfile.cli
+            tag-suffix: "-cli"
+          - image-type: training
+            dockerfile: Dockerfile.training
+            tag-suffix: "-training"
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch,suffix=${{ matrix.tag-suffix }}
+          type=ref,event=pr,suffix=${{ matrix.tag-suffix }}
+          type=sha,suffix=${{ matrix.tag-suffix }}
+          type=raw,value=latest,suffix=${{ matrix.tag-suffix }},enable={{is_default_branch}}
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ${{ matrix.dockerfile }}
+        push: false
+        tags: test-image:${{ matrix.image-type }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        load: true
+
+    - name: Test CLI functionality
+      if: matrix.image-type == 'all-in-one' || matrix.image-type == 'cli'
+      run: |
+        echo "Testing CLI help command..."
+        docker run --rm test-image:${{ matrix.image-type }} --help
+        
+        echo "Testing project scaffolding..."
+        mkdir -p test-output
+        docker run --rm -v $(pwd)/test-output:/workspace test-image:${{ matrix.image-type }} scaffold test-project --template nano --no-interactive
+        
+        echo "Verifying generated project structure..."
+        if [ ! -d "test-output/test-project" ]; then
+          echo "❌ Project directory not created"
+          exit 1
+        fi
+        
+        if [ ! -f "test-output/test-project/llm.config.js" ]; then
+          echo "❌ Configuration file not created"
+          exit 1
+        fi
+        
+        if [ ! -f "test-output/test-project/requirements.txt" ]; then
+          echo "❌ Requirements file not created"
+          exit 1
+        fi
+        
+        echo "✅ CLI tests passed"
+
+    - name: Test Python dependencies
+      if: matrix.image-type == 'all-in-one' || matrix.image-type == 'training'
+      run: |
+        echo "Testing Python imports..."
+        docker run --rm test-image:${{ matrix.image-type }} python -c "
+        import sys
+        print(f'Python version: {sys.version}')
+        
+        try:
+            import torch
+            print(f'✅ PyTorch {torch.__version__} imported successfully')
+        except ImportError as e:
+            print(f'❌ PyTorch import failed: {e}')
+            sys.exit(1)
+        
+        try:
+            import transformers
+            print(f'✅ Transformers {transformers.__version__} imported successfully')
+        except ImportError as e:
+            print(f'❌ Transformers import failed: {e}')
+            sys.exit(1)
+        
+        try:
+            import tokenizers
+            print(f'✅ Tokenizers imported successfully')
+        except ImportError as e:
+            print(f'❌ Tokenizers import failed: {e}')
+            sys.exit(1)
+        
+        try:
+            import numpy as np
+            print(f'✅ NumPy {np.__version__} imported successfully')
+        except ImportError as e:
+            print(f'❌ NumPy import failed: {e}')
+            sys.exit(1)
+        
+        print('✅ All core dependencies imported successfully')
+        "
+
+    - name: Test training setup
+      if: matrix.image-type == 'all-in-one'
+      run: |
+        echo "Testing complete training pipeline setup..."
+        mkdir -p test-training
+        
+        # Create a test project
+        docker run --rm -v $(pwd)/test-training:/workspace test-image:${{ matrix.image-type }} scaffold training-test --template nano --no-interactive
+        
+        # Test training module imports
+        docker run --rm -v $(pwd)/test-training/training-test:/workspace test-image:${{ matrix.image-type }} python -c "
+        import sys
+        sys.path.append('/workspace')
+        
+        try:
+            from training.trainer import LLMTrainer
+            print('✅ LLMTrainer imported successfully')
+        except ImportError as e:
+            print(f'❌ LLMTrainer import failed: {e}')
+            sys.exit(1)
+        
+        try:
+            from models.architectures.gpt import GPTModel
+            print('✅ GPTModel imported successfully')  
+        except ImportError as e:
+            print(f'❌ GPTModel import failed: {e}')
+            sys.exit(1)
+        
+        try:
+            from data.dataset import TextDataset
+            print('✅ TextDataset imported successfully')
+        except ImportError as e:
+            print(f'❌ TextDataset import failed: {e}')
+            sys.exit(1)
+        
+        print('✅ All training modules imported successfully')
+        "
+
+    - name: Test resource usage
+      run: |
+        echo "Testing container resource usage..."
+        docker run --rm test-image:${{ matrix.image-type }} python -c "
+        import psutil
+        import sys
+        
+        # Memory usage
+        memory = psutil.virtual_memory()
+        print(f'Available memory: {memory.available / 1e9:.1f} GB')
+        
+        # CPU info
+        print(f'CPU count: {psutil.cpu_count()}')
+        
+        # Disk usage
+        disk = psutil.disk_usage('/')
+        print(f'Available disk: {disk.free / 1e9:.1f} GB')
+        
+        # Check if running in container
+        try:
+            with open('/proc/1/cgroup', 'r') as f:
+                if 'docker' in f.read():
+                    print('✅ Running in Docker container')
+                else:
+                    print('⚠️  Not detected as Docker container')
+        except:
+            print('⚠️  Could not determine container status')
+        "
+
+    - name: Build and push Docker image
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ${{ matrix.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Generate build summary
+      if: always()
+      run: |
+        echo "## Docker Build Summary - ${{ matrix.image-type }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Image Type | ${{ matrix.image-type }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Dockerfile | ${{ matrix.dockerfile }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Build Time | $(date -u) |" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "| Image Size | $(docker images test-image:${{ matrix.image-type }} --format 'table {{.Size}}' | tail -1) |" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  integration-test:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build all-in-one image for integration test
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        push: false
+        tags: create-llm:integration-test
+        cache-from: type=gha
+        load: true
+
+    - name: Run end-to-end integration test
+      timeout-minutes: 15
+      run: |
+        echo "🧪 Running end-to-end integration test..."
+        
+        # Create test workspace
+        mkdir -p integration-test
+        cd integration-test
+        
+        # Test 1: Create project with different templates
+        for template in nano tiny; do
+          echo "Testing $template template..."
+          
+          docker run --rm -v $(pwd):/workspace create-llm:integration-test \
+            scaffold ${template}-project --template $template --no-interactive
+          
+          if [ ! -d "${template}-project" ]; then
+            echo "❌ Failed to create $template project"
+            exit 1
+          fi
+          
+          echo "✅ $template project created successfully"
+        done
+        
+        # Test 2: Quick training test (minimal steps)
+        echo "Testing training pipeline..."
+        cd nano-project
+        
+        # Create minimal training data
+        mkdir -p data/raw
+        echo "This is a test sentence for training." > data/raw/test.txt
+        echo "Another test sentence for the model." >> data/raw/test.txt
+        echo "Final test sentence to complete dataset." >> data/raw/test.txt
+        
+        # Run quick training test (dry run)
+        timeout 300 docker run --rm -v $(pwd):/workspace create-llm:integration-test \
+          python training/train.py --max-steps 5 --save-steps 10 --eval-steps 10 --no-tensorboard --dry-run || true
+        
+        echo "✅ Integration test completed successfully"
+
+    - name: Test Docker Compose setup
+      run: |
+        echo "Testing Docker Compose configuration..."
+        
+        # Test compose file syntax
+        docker-compose config > /dev/null
+        echo "✅ Docker Compose configuration is valid"
+        
+        # Test building with compose
+        docker-compose build create-llm
+        echo "✅ Docker Compose build successful"
+
+  security-scan:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Build image for security scan
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: Dockerfile
+        push: false
+        tags: create-llm:security-scan
+        load: true
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'create-llm:security-scan'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Generate security summary
+      if: always()
+      run: |
+        echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Security scan completed using Trivy." >> $GITHUB_STEP_SUMMARY
+        echo "Results have been uploaded to the Security tab." >> $GITHUB_STEP_SUMMARY

@@ -108,6 +108,63 @@ npx create-llm my-llm --template tiny --tokenizer bpe --skip-install
 
 ---
 
+## 🐳 Docker Support
+
+**Run create-llm without installing Node.js or Python locally!**
+
+### Quick Docker Setup
+
+```bash
+# Build the Docker image
+git clone https://github.com/theaniketgiri/create-llm.git
+cd create-llm
+docker build -t create-llm .
+
+# Create a new project
+mkdir my-projects && cd my-projects
+docker run -it -v $(pwd):/workspace create-llm scaffold my-llm --template tiny
+
+# Train your model
+cd my-llm
+docker run --gpus all -v $(pwd):/workspace create-llm train
+
+# Start chat interface
+docker run -p 7860:7860 -v $(pwd):/workspace create-llm chat
+```
+
+### Docker Compose (Recommended)
+
+```bash
+# Clone and build
+git clone https://github.com/theaniketgiri/create-llm.git
+cd create-llm
+make build
+
+# Create project with interactive prompts
+make compose-cli
+
+# Train with GPU support
+make compose-train
+
+# Start chat interface at http://localhost:7860
+make compose-chat
+
+# Development environment
+make dev
+```
+
+### Benefits
+
+✅ **No Local Dependencies** - Skip Node.js and Python installation  
+✅ **GPU Support** - Automatic NVIDIA GPU detection  
+✅ **Consistent Environment** - Same setup across all machines  
+✅ **Easy Scaling** - Run multiple training jobs in parallel  
+✅ **Production Ready** - Deploy anywhere Docker runs  
+
+📖 **Full Docker Guide**: See [DOCKER.md](DOCKER.md) for complete documentation
+
+---
+
 ## Templates
 
 ### NANO
@@ -473,16 +530,26 @@ npx @theanikrtgiri/create-llm my-project -y
 
 ## Requirements
 
-### For CLI Tool
+### Option 1: Local Installation
+
+**For CLI Tool**
 - Node.js 18.0.0 or higher
 - npm 8.0.0 or higher
 
-### For Training
+**For Training**
 - Python 3.8 or higher
 - PyTorch 2.0.0 or higher
 - 4GB RAM minimum (NANO/TINY)
 - 12GB VRAM recommended (SMALL)
 - 40GB+ VRAM for BASE
+
+### Option 2: Docker (Recommended)
+
+**No local dependencies needed!**
+- Docker 20.10+ or Docker Desktop
+- NVIDIA Docker (for GPU support)
+- 8GB RAM minimum
+- NVIDIA GPU (optional, for faster training)
 
 ### Operating Systems
 - Windows 10/11

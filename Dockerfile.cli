@@ -1,0 +1,35 @@
+# Lightweight CLI-only Docker image
+# Use this for scaffolding projects without Python dependencies
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install git for cloning templates
+RUN apk add --no-cache git
+
+# Copy package files
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Install TypeScript globally for building
+RUN npm install -g typescript
+
+# Copy source code and templates
+COPY src/ ./src/
+COPY templates/ ./templates/
+
+# Build the CLI
+RUN npm run build
+
+# Create global CLI command
+RUN npm link
+
+# Set working directory for projects
+WORKDIR /workspace
+
+# Default command
+CMD ["create-llm", "--help"]
