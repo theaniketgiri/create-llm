@@ -88,9 +88,12 @@ jobs:
         echo "Testing CLI help command..."
         docker run --rm test-image:${{ matrix.image-type }} --help
         
+        echo "Testing CLI version command..."
+        docker run --rm test-image:${{ matrix.image-type }} --version
+        
         echo "Testing project scaffolding..."
         mkdir -p test-output
-        docker run --rm -v $(pwd)/test-output:/workspace test-image:${{ matrix.image-type }} scaffold test-project --template nano --no-interactive
+        docker run --rm -v $(pwd)/test-output:/workspace test-image:${{ matrix.image-type }} test-project --template nano --tokenizer bpe --yes
         
         echo "Verifying generated project structure..."
         if [ ! -d "test-output/test-project" ]; then
@@ -156,7 +159,7 @@ jobs:
         mkdir -p test-training
         
         # Create a test project
-        docker run --rm -v $(pwd)/test-training:/workspace test-image:${{ matrix.image-type }} scaffold training-test --template nano --no-interactive
+        docker run --rm -v $(pwd)/test-training:/workspace test-image:${{ matrix.image-type }} training-test --template nano --tokenizer bpe --yes
         
         # Test training module imports
         docker run --rm -v $(pwd)/test-training/training-test:/workspace test-image:${{ matrix.image-type }} python -c "
@@ -280,7 +283,7 @@ jobs:
           echo "Testing $template template..."
           
           docker run --rm -v $(pwd):/workspace create-llm:integration-test \
-            scaffold ${template}-project --template $template --no-interactive
+            ${template}-project --template $template --tokenizer bpe --yes
           
           if [ ! -d "${template}-project" ]; then
             echo "❌ Failed to create $template project"
@@ -290,7 +293,7 @@ jobs:
           echo "✅ $template project created successfully"
         done
         
-        # Test 2: Quick training test (minimal steps)
+        # Test 2: Verify training pipeline structure
         echo "Testing training pipeline..."
         cd nano-project
         
@@ -300,9 +303,9 @@ jobs:
         echo "Another test sentence for the model." >> data/raw/test.txt
         echo "Final test sentence to complete dataset." >> data/raw/test.txt
         
-        # Run quick training test (dry run)
-        timeout 300 docker run --rm -v $(pwd):/workspace create-llm:integration-test \
-          python training/train.py --max-steps 5 --save-steps 10 --eval-steps 10 --no-tensorboard --dry-run || true
+        # Verify training script exists and can be imported
+        docker run --rm -v $(pwd):/workspace create-llm:integration-test \
+          python -c "import sys; sys.path.append('/workspace'); from training import train; print('✅ Training module verified')"
         
         echo "✅ Integration test completed successfully"
 
