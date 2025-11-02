@@ -1,6 +1,15 @@
 # create-llm
 
-**CLI tool for scaffolding LLM training projects**
+```
+                          _                  _  _              
+  ___  _ __   ___   __ _ | |_   ___         | || | _ __ ___   
+ / __|| '__| / _ \ / _` || __| / _ \  _____ | || || '_ ` _ \  
+| (__ | |   |  __/| (_| || |_ |  __/ |_____|| || || | | | | | 
+ \___||_|    \___| \__,_| \__| \___|        |_||_||_| |_| |_| 
+                                                               
+```
+
+**CLI tool for scaffolding LLM Creation and training **
 
 Create production-ready LLM training projects in seconds. Similar to create-next-app but for training custom language models.
 
