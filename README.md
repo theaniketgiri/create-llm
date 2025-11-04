@@ -531,7 +531,7 @@ npx @theanikrtgiri/create-llm my-project -y
 
 ### Getting Help
 
-- [Full Documentation](https://github.com/theaniketgiri/create-llm/docs)
+- [Documentation](https://github.com/theaniketgiri/create-llm#readme)
 - [Report Issues](https://github.com/theaniketgiri/create-llm/issues)
 - [Email Support](mailto:theaniketgiri@gmail.com)
 
