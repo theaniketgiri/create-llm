@@ -1,0 +1,240 @@
+---
+title: 'Common Issues'
+description: 'Solutions to frequently encountered problems'
+---
+
+## Installation Issues
+
+<AccordionGroup>
+  <Accordion title="Node.js not found">
+    **Problem:** `node: command not found`
+    
+    **Solution:**
+    1. Install Node.js from [nodejs.org](https://nodejs.org/)
+    2. Verify: `node --version`
+    3. Restart terminal
+  </Accordion>
+
+  <Accordion title="Python not found">
+    **Problem:** `python: command not found`
+    
+    **Solution:**
+    1. Install Python from [python.org](https://www.python.org/)
+    2. Check "Add Python to PATH" during installation
+    3. Verify: `python --version`
+  </Accordion>
+
+  <Accordion title="Permission denied">
+    **Problem:** `EACCES: permission denied`
+    
+    **Solution:**
+    ```bash
+    # Use npx instead of global install
+    npx create-llm my-project
+    
+    # Or fix permissions
+    sudo chown -R $USER /usr/local/lib/node_modules
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Training Issues
+
+<AccordionGroup>
+  <Accordion title="CUDA out of memory">
+    **Problem:** `RuntimeError: CUDA out of memory`
+    
+    **Solutions:**
+    1. Reduce batch_size:
+    ```javascript
+    batch_size: 8  // or 4
+    ```
+    
+    2. Enable mixed precision:
+    ```javascript
+    mixed_precision: true
+    ```
+    
+    3. Increase gradient accumulation:
+    ```javascript
+    gradient_accumulation_steps: 4
+    ```
+    
+    4. Reduce max_length:
+    ```javascript
+    max_length: 256
+    ```
+  </Accordion>
+
+  <Accordion title="Loss not decreasing">
+    **Problem:** Training loss stays constant or increases
+    
+    **Solutions:**
+    1. Check learning rate:
+    ```javascript
+    learning_rate: 0.0001  // Try reducing
+    ```
+    
+    2. Verify data loading:
+    ```bash
+    python data/verify.py
+    ```
+    
+    3. Increase warmup:
+    ```javascript
+    warmup_steps: 1000
+    ```
+    
+    4. Check for NaN values in data
+  </Accordion>
+
+  <Accordion title="Loss exploding">
+    **Problem:** Loss becomes NaN or infinity
+    
+    **Solutions:**
+    1. Reduce learning rate:
+    ```javascript
+    learning_rate: 0.00001
+    ```
+    
+    2. Enable gradient clipping:
+    ```javascript
+    gradient_clip: 0.5
+    ```
+    
+    3. Increase warmup:
+    ```javascript
+    warmup_steps: 2000
+    ```
+  </Accordion>
+
+  <Accordion title="Model overfitting">
+    **Problem:** Training loss << validation loss
+    
+    **Solutions:**
+    1. Add more data
+    2. Increase dropout:
+    ```javascript
+    dropout: 0.3
+    ```
+    3. Use smaller model
+    4. Add regularization:
+    ```javascript
+    weight_decay: 0.1
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Data Issues
+
+<AccordionGroup>
+  <Accordion title="Vocab size mismatch">
+    **Problem:** `Vocab size mismatch detected`
+    
+    **Solution:**
+    This is automatically handled! The model uses the actual tokenizer vocab size.
+    
+    <Info>This is a warning, not an error</Info>
+  </Accordion>
+
+  <Accordion title="Sequence too long">
+    **Problem:** `Position embedding index error`
+    
+    **Solution:**
+    Sequences are automatically truncated. To handle longer sequences:
+    ```javascript
+    max_length: 1024  // Increase if needed
+    ```
+  </Accordion>
+
+  <Accordion title="No data found">
+    **Problem:** `Training data not found`
+    
+    **Solution:**
+    1. Check data path:
+    ```bash
+    ls data/raw/
+    ```
+    
+    2. Run data preparation:
+    ```bash
+    python data/prepare.py
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Generation Issues
+
+<AccordionGroup>
+  <Accordion title="Repetitive output">
+    **Problem:** Model repeats same text
+    
+    **Solutions:**
+    1. Increase temperature:
+    ```bash
+    --temperature 1.0
+    ```
+    
+    2. Add repetition penalty:
+    ```bash
+    --repetition-penalty 1.2
+    ```
+    
+    3. Use nucleus sampling:
+    ```bash
+    --top-p 0.9
+    ```
+  </Accordion>
+
+  <Accordion title="Incoherent output">
+    **Problem:** Generated text doesn't make sense
+    
+    **Solutions:**
+    1. Train longer
+    2. Check training data quality
+    3. Reduce temperature:
+    ```bash
+    --temperature 0.7
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Docker Issues
+
+<AccordionGroup>
+  <Accordion title="GPU not detected">
+    **Problem:** Docker can't access GPU
+    
+    **Solutions:**
+    1. Install NVIDIA Container Toolkit
+    2. Restart Docker daemon:
+    ```bash
+    sudo systemctl restart docker
+    ```
+    3. Use --gpus flag:
+    ```bash
+    docker run --gpus all ...
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied">
+    **Problem:** Can't access Docker
+    
+    **Solution:**
+    ```bash
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Getting More Help
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/theaniketgiri/create-llm/issues">
+    Report bugs and request features
+  </Card>
+  <Card title="Performance Tips" icon="gauge" href="/troubleshooting/performance">
+    Optimize training speed
+  </Card>
+</CardGroup>

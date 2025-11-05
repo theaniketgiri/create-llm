@@ -21,7 +21,7 @@ Create production-ready LLM training projects in seconds. Similar to create-next
 [npm Package](https://www.npmjs.com/package/@theanikrtgiri/create-llm) • [Documentation](#documentation) • [Report Bug](https://github.com/theaniketgiri/create-llm/issues) • [Request Feature](https://github.com/theaniketgiri/create-llm/issues)
 
 ```bash
-npx @theanikrtgiri/create-llm my-awesome-llm
+npx create-llm my-awesome-llm
 cd my-awesome-llm
 pip install -r requirements.txt
 python training/train.py
@@ -89,17 +89,17 @@ Optional integrations:
 
 ```bash
 # Using npx (recommended - no installation needed)
-npx @theanikrtgiri/create-llm my-llm
+npx create-llm my-llm
 
 # Or install globally
-npm install -g @theanikrtgiri/create-llm
+npm install -g create-llm
 create-llm my-llm
 ```
 
 ### Interactive Setup
 
 ```bash
-npx @theanikrtgiri/create-llm
+npx create-llm
 ```
 
 You'll be prompted for:
@@ -255,7 +255,7 @@ When to use:
 ### 1. Create Your Project
 
 ```bash
-npx @theanikrtgiri/create-llm my-llm --template tiny --tokenizer bpe
+npx create-llm my-llm --template tiny --tokenizer bpe
 cd my-llm
 ```
 
@@ -432,7 +432,7 @@ module.exports = {
 ### Commands
 
 ```bash
-npx @theanikrtgiri/create-llm [project-name] [options]
+npx create-llm [project-name] [options]
 ```
 
 ### Options
@@ -450,16 +450,16 @@ npx @theanikrtgiri/create-llm [project-name] [options]
 
 ```bash
 # Interactive mode (recommended for first time)
-npx @theanikrtgiri/create-llm
+npx create-llm
 
 # Quick start with defaults
-npx @theanikrtgiri/create-llm my-project
+npx create-llm my-project
 
 # Specify everything
-npx @theanikrtgiri/create-llm my-project --template nano --tokenizer bpe --skip-install
+npx create-llm my-project --template nano --tokenizer bpe --skip-install
 
 # Skip prompts
-npx @theanikrtgiri/create-llm my-project -y
+npx create-llm my-project -y
 ```
 
 ---

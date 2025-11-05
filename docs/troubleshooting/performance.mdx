@@ -1,0 +1,123 @@
+---
+title: 'Performance Optimization'
+description: 'Speed up training and inference'
+---
+
+## Training Speed
+
+<CardGroup cols={2}>
+  <Card title="GPU Utilization" icon="microchip">
+    Maximize GPU usage
+  </Card>
+  <Card title="Data Loading" icon="database">
+    Optimize data pipeline
+  </Card>
+  <Card title="Mixed Precision" icon="bolt">
+    2x faster with FP16
+  </Card>
+  <Card title="Batch Size" icon="layer-group">
+    Larger batches = faster
+  </Card>
+</CardGroup>
+
+## GPU Optimization
+
+### Enable Mixed Precision
+```javascript
+training: {
+  mixed_precision: true,  // 2x speedup
+}
+```
+
+### Maximize Batch Size
+```javascript
+training: {
+  batch_size: 32,  // As large as memory allows
+}
+```
+
+### Pin Memory
+```javascript
+data: {
+  pin_memory: true,  // Faster GPU transfer
+}
+```
+
+## CPU Optimization
+
+### Reduce Batch Size
+```javascript
+training: {
+  batch_size: 8,
+  gradient_accumulation_steps: 4,
+}
+```
+
+### Disable Multiprocessing
+```javascript
+data: {
+  num_workers: 0,  // Avoid overhead on CPU
+}
+```
+
+## Data Loading
+
+### Parallel Loading
+```javascript
+data: {
+  num_workers: 4,  // Load data in parallel
+  prefetch_factor: 2,
+}
+```
+
+### Cache Dataset
+```python
+# Cache processed data
+dataset = LLMDataset(cache=True)
+```
+
+## Memory Optimization
+
+### Gradient Checkpointing
+```javascript
+training: {
+  gradient_checkpointing: true,  // Trade compute for memory
+}
+```
+
+### Reduce Sequence Length
+```javascript
+model: {
+  max_length: 512,  // Shorter = less memory
+}
+```
+
+## Monitoring Performance
+
+```bash
+# Watch GPU usage
+watch -n 1 nvidia-smi
+
+# Profile training
+python -m torch.utils.bottleneck training/train.py
+```
+
+## Benchmarks
+
+| Template | GPU | Batch Size | Tokens/sec |
+|----------|-----|------------|------------|
+| NANO | CPU | 8 | 500 |
+| TINY | RTX 3060 | 16 | 2,000 |
+| SMALL | RTX 3080 | 32 | 5,000 |
+| BASE | A100 | 64 | 15,000 |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Advanced optimization
+  </Card>
+  <Card title="Debugging" icon="bug" href="/troubleshooting/debugging">
+    Debug performance issues
+  </Card>
+</CardGroup>

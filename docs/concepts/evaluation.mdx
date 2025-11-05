@@ -1,0 +1,257 @@
+---
+title: 'Evaluation'
+description: 'Evaluating your trained language model'
+---
+
+## Evaluation Overview
+
+Evaluation measures how well your model performs on unseen data and generates text.
+
+## Evaluation Metrics
+
+<CardGroup cols={2}>
+  <Card title="Loss" icon="chart-line">
+    Average prediction error
+  </Card>
+  <Card title="Perplexity" icon="gauge">
+    How "surprised" the model is
+  </Card>
+  <Card title="Generation Quality" icon="star">
+    Coherence and relevance
+  </Card>
+  <Card title="Speed" icon="bolt">
+    Tokens generated per second
+  </Card>
+</CardGroup>
+
+## Running Evaluation
+
+```bash
+python evaluation/evaluate.py \
+  --checkpoint checkpoints/checkpoint-best.pt \
+  --data data/processed/val.pt
+```
+
+## Perplexity
+
+Perplexity measures model uncertainty:
+
+```
+Perplexity = exp(average_loss)
+```
+
+**Interpretation:**
+- Lower = Better
+- Perplexity of 10 = model is as uncertain as choosing from 10 options
+- Perplexity < 5 = Good
+- Perplexity < 2 = Excellent (or overfitting)
+
+**By Template:**
+| Template | Good Perplexity | Excellent |
+|----------|----------------|-----------|
+| NANO | 10-20 | 7-10 |
+| TINY | 5-10 | 3-5 |
+| SMALL | 3-5 | 2-3 |
+| BASE | 2-3 | 1.5-2 |
+
+## Text Generation
+
+Generate text to evaluate quality:
+
+```bash
+python evaluation/generate.py \
+  --checkpoint checkpoints/checkpoint-best.pt \
+  --prompt "Once upon a time" \
+  --max-length 100 \
+  --temperature 0.8
+```
+
+### Generation Parameters
+
+<AccordionGroup>
+  <Accordion title="Temperature">
+    Controls randomness (0.0 to 2.0):
+    ```python
+    temperature: 0.1  # Deterministic, repetitive
+    temperature: 0.7  # Balanced (recommended)
+    temperature: 1.0  # More creative
+    temperature: 1.5  # Very random
+    ```
+  </Accordion>
+
+  <Accordion title="Top-k Sampling">
+    Sample from top k most likely tokens:
+    ```python
+    top_k: 50  # Consider top 50 tokens
+    ```
+  </Accordion>
+
+  <Accordion title="Top-p (Nucleus) Sampling">
+    Sample from smallest set with cumulative probability p:
+    ```python
+    top_p: 0.9  # Consider tokens with 90% probability mass
+    ```
+  </Accordion>
+
+  <Accordion title="Repetition Penalty">
+    Discourage repeating tokens:
+    ```python
+    repetition_penalty: 1.2  # Penalize repetition
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Qualitative Evaluation
+
+Manually assess generation quality:
+
+### Coherence
+Does the text make sense?
+- ✅ Logical flow
+- ✅ Consistent topic
+- ❌ Random jumps
+- ❌ Contradictions
+
+### Relevance
+Does it match the prompt?
+- ✅ On-topic
+- ✅ Appropriate style
+- ❌ Off-topic
+- ❌ Ignores context
+
+### Fluency
+Is it grammatically correct?
+- ✅ Proper grammar
+- ✅ Natural phrasing
+- ❌ Broken sentences
+- ❌ Awkward wording
+
+### Creativity
+Is it interesting?
+- ✅ Novel ideas
+- ✅ Varied vocabulary
+- ❌ Repetitive
+- ❌ Generic
+
+## Validation During Training
+
+Monitor validation metrics during training:
+
+```javascript
+// In llm.config.js
+training: {
+  eval_interval: 500,  // Evaluate every 500 steps
+}
+```
+
+**Watch for:**
+- Validation loss should decrease
+- Gap between train/val loss (overfitting indicator)
+- Perplexity trends
+
+## Sample Generations
+
+Generate multiple samples to assess consistency:
+
+```bash
+python evaluation/generate.py \
+  --checkpoint checkpoints/checkpoint-best.pt \
+  --prompt "The future of AI" \
+  --num-samples 5 \
+  --temperature 0.8
+```
+
+Compare samples for:
+- Consistency in quality
+- Diversity of outputs
+- Coherence across samples
+
+## Benchmark Testing
+
+Test on standard prompts:
+
+```python
+prompts = [
+    "Once upon a time",
+    "In the year 2050",
+    "The secret to happiness is",
+    "Scientists discovered that",
+]
+
+for prompt in prompts:
+    generate(model, prompt)
+```
+
+## Interactive Evaluation
+
+Use the chat interface:
+
+```bash
+python chat.py --checkpoint checkpoints/checkpoint-best.pt
+```
+
+Test with:
+- Simple questions
+- Complex queries
+- Follow-up questions
+- Edge cases
+
+## Comparing Models
+
+Compare different checkpoints:
+
+```bash
+# Evaluate multiple checkpoints
+python evaluation/compare.py \
+  --checkpoints checkpoint-1000.pt checkpoint-5000.pt checkpoint-best.pt
+```
+
+## Evaluation Checklist
+
+<Steps>
+  <Step title="Quantitative Metrics">
+    - [ ] Calculate perplexity
+    - [ ] Measure generation speed
+    - [ ] Check validation loss
+  </Step>
+
+  <Step title="Qualitative Assessment">
+    - [ ] Generate sample texts
+    - [ ] Test with various prompts
+    - [ ] Assess coherence and relevance
+  </Step>
+
+  <Step title="Interactive Testing">
+    - [ ] Use chat interface
+    - [ ] Try edge cases
+    - [ ] Test different temperatures
+  </Step>
+
+  <Step title="Comparison">
+    - [ ] Compare with baseline
+    - [ ] Test against checkpoints
+    - [ ] Benchmark on standard prompts
+  </Step>
+</Steps>
+
+## Red Flags
+
+<Warning>
+  Watch out for these issues:
+</Warning>
+
+- **Perplexity < 1.5**: Likely overfitting
+- **Repetitive text**: Increase temperature or add repetition penalty
+- **Incoherent output**: Model undertrained or data quality issues
+- **Off-topic responses**: Need more training or better data
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deployment" icon="rocket" href="/guides/deployment">
+    Deploy your trained model
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/troubleshooting/common-issues">
+    Fix common issues
+  </Card>
+</CardGroup>

@@ -1,0 +1,168 @@
+---
+title: 'Callbacks API'
+description: 'Training callback system'
+---
+
+## Base Callback
+
+All callbacks inherit from the base class:
+
+```python
+from training.callbacks import Callback
+
+class CustomCallback(Callback):
+    def on_train_begin(self, trainer):
+        """Called at the start of training"""
+        pass
+    
+    def on_train_end(self, trainer):
+        """Called at the end of training"""
+        pass
+    
+    def on_epoch_begin(self, trainer, epoch):
+        """Called at the start of each epoch"""
+        pass
+    
+    def on_epoch_end(self, trainer, epoch):
+        """Called at the end of each epoch"""
+        pass
+    
+    def on_batch_begin(self, trainer, batch):
+        """Called before processing each batch"""
+        pass
+    
+    def on_batch_end(self, trainer, batch):
+        """Called after processing each batch"""
+        pass
+    
+    def on_step_end(self, trainer, step, loss):
+        """Called after each training step"""
+        pass
+```
+
+## Built-in Callbacks
+
+### CheckpointCallback
+
+Saves model checkpoints during training.
+
+```python
+from training.callbacks import CheckpointCallback
+
+callback = CheckpointCallback(
+    checkpoint_dir='checkpoints',
+    save_interval=5000,
+    save_total_limit=3,
+    save_best=True,
+    verbose=True
+)
+```
+
+**Parameters:**
+- `checkpoint_dir` (str): Directory to save checkpoints
+- `save_interval` (int): Save every N steps
+- `save_total_limit` (int): Maximum checkpoints to keep
+- `save_best` (bool): Save best model based on validation loss
+- `verbose` (bool): Print save messages
+
+### LoggingCallback
+
+Logs training metrics.
+
+```python
+from training.callbacks import LoggingCallback
+
+callback = LoggingCallback(
+    log_interval=100,
+    log_dir='logs',
+    verbose=True
+)
+```
+
+**Parameters:**
+- `log_interval` (int): Log every N steps
+- `log_dir` (str): Directory for log files
+- `verbose` (bool): Print to console
+
+### TensorBoardCallback
+
+Logs metrics to TensorBoard.
+
+```python
+from training.callbacks import TensorBoardCallback
+
+callback = TensorBoardCallback(
+    log_dir='logs/tensorboard',
+    log_interval=10
+)
+```
+
+**Parameters:**
+- `log_dir` (str): TensorBoard log directory
+- `log_interval` (int): Log every N steps
+
+### EarlyStoppingCallback
+
+Stops training when validation loss stops improving.
+
+```python
+from training.callbacks import EarlyStoppingCallback
+
+callback = EarlyStoppingCallback(
+    patience=5,
+    min_delta=0.001
+)
+```
+
+**Parameters:**
+- `patience` (int): Number of evaluations to wait
+- `min_delta` (float): Minimum improvement threshold
+
+## Custom Callback Example
+
+```python
+class LearningRateSchedulerCallback(Callback):
+    def __init__(self, scheduler):
+        self.scheduler = scheduler
+    
+    def on_step_end(self, trainer, step, loss):
+        self.scheduler.step()
+        
+        if step % 100 == 0:
+            lr = trainer.optimizer.param_groups[0]['lr']
+            print(f"Step {step}: LR = {lr:.6f}")
+```
+
+## Using Callbacks
+
+```python
+from training import Trainer
+from training.callbacks import CheckpointCallback, LoggingCallback
+
+# Create callbacks
+callbacks = [
+    CheckpointCallback(checkpoint_dir='checkpoints'),
+    LoggingCallback(log_interval=100),
+    CustomCallback()
+]
+
+# Pass to trainer
+trainer = Trainer(
+    model=model,
+    train_loader=train_loader,
+    callbacks=callbacks
+)
+
+trainer.train()
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Trainer API" icon="code" href="/api-reference/trainer">
+    Trainer reference
+  </Card>
+  <Card title="Training Guide" icon="graduation-cap" href="/concepts/training">
+    Learn about training
+  </Card>
+</CardGroup>

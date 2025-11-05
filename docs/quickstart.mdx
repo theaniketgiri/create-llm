@@ -1,0 +1,175 @@
+---
+title: 'Quickstart'
+description: 'Train your first LLM in under 5 minutes'
+---
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 18.0.0 or higher
+  </Card>
+  <Card title="Python" icon="python">
+    Version 3.8 or higher
+  </Card>
+</CardGroup>
+
+## Installation
+
+<Tabs>
+  <Tab title="npx (Recommended)">
+    No installation needed! Just run:
+    ```bash
+    npx create-llm my-llm
+    ```
+  </Tab>
+  <Tab title="Global Install">
+    Install globally for repeated use:
+    ```bash
+    npm install -g create-llm
+    create-llm my-llm
+    ```
+  </Tab>
+  <Tab title="Docker">
+    Use Docker for zero local dependencies:
+    ```bash
+    docker run -it -v $(pwd):/workspace create-llm my-llm
+    ```
+  </Tab>
+</Tabs>
+
+## Create Your First Project
+
+<Steps>
+  <Step title="Scaffold Project">
+    Create a new project with the NANO template (perfect for learning):
+    ```bash
+    npx create-llm my-first-llm --template nano --tokenizer bpe
+    cd my-first-llm
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install Python dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+    <Tip>Use a virtual environment to keep dependencies isolated</Tip>
+  </Step>
+
+  <Step title="Add Training Data">
+    Add some text data for training:
+    ```bash
+    # Download Shakespeare as example
+    curl https://www.gutenberg.org/files/100/100-0.txt > data/raw/shakespeare.txt
+    
+    # Or add your own text
+    echo "Your custom training text here" > data/raw/train.txt
+    ```
+    <Note>NANO template needs at least 100 examples to avoid overfitting</Note>
+  </Step>
+
+  <Step title="Train Tokenizer">
+    Train the tokenizer on your data:
+    ```bash
+    python tokenizer/train.py --data data/raw/
+    ```
+    This creates a vocabulary from your text.
+  </Step>
+
+  <Step title="Prepare Dataset">
+    Tokenize and prepare your data:
+    ```bash
+    python data/prepare.py
+    ```
+  </Step>
+
+  <Step title="Start Training">
+    Begin training your model:
+    ```bash
+    python training/train.py
+    ```
+    <Info>NANO template trains in 1-2 minutes on any CPU!</Info>
+  </Step>
+
+  <Step title="Chat with Your Model">
+    Once training completes, chat with your model:
+    ```bash
+    python chat.py --checkpoint checkpoints/checkpoint-best.pt
+    ```
+  </Step>
+</Steps>
+
+## What You Get
+
+Your project includes:
+
+<CardGroup cols={2}>
+  <Card title="Model Architecture" icon="brain">
+    Complete GPT implementation with configurable layers
+  </Card>
+  <Card title="Training Pipeline" icon="gears">
+    Full training loop with callbacks and checkpointing
+  </Card>
+  <Card title="Tokenizer" icon="text">
+    BPE/WordPiece/Unigram tokenizer training
+  </Card>
+  <Card title="Evaluation Tools" icon="chart-line">
+    Perplexity, generation, and chat interfaces
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore Templates"
+    icon="layer-group"
+    href="/templates/overview"
+  >
+    Learn about different model sizes
+  </Card>
+  <Card
+    title="Training Tips"
+    icon="lightbulb"
+    href="/guides/training-tips"
+  >
+    Optimize your training process
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/config/overview"
+  >
+    Customize your model and training
+  </Card>
+  <Card
+    title="Deployment"
+    icon="rocket"
+    href="/guides/deployment"
+  >
+    Deploy your trained model
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="CUDA out of memory">
+    Reduce `batch_size` in `llm.config.js` or enable `mixed_precision: true`
+  </Accordion>
+  <Accordion title="Training loss not decreasing">
+    Check your learning rate (try 1e-4 to 1e-3) and verify data is loading correctly
+  </Accordion>
+  <Accordion title="Model overfitting">
+    Add more data, use smaller template, or increase dropout rate
+  </Accordion>
+</AccordionGroup>
+
+<Card
+  title="Need Help?"
+  icon="question"
+  href="/troubleshooting/common-issues"
+>
+  Check out our troubleshooting guide for more solutions
+</Card>

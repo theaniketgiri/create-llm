@@ -1,0 +1,285 @@
+---
+title: 'BASE Template'
+description: '1B parameter model - Research-grade high-quality models'
+---
+
+## Overview
+
+The BASE template is the largest model in create-llm, designed for research projects and applications requiring the highest quality.
+
+<CardGroup cols={2}>
+  <Card title="Parameters" icon="hashtag">
+    ~1 Billion
+  </Card>
+  <Card title="Training Time" icon="clock">
+    1-3 days on A100
+  </Card>
+  <Card title="Hardware" icon="microchip">
+    A100 or multi-GPU setup
+  </Card>
+  <Card title="Data Needed" icon="database">
+    100,000+ examples required
+  </Card>
+</CardGroup>
+
+## When to Use BASE
+
+<Check>**Perfect for:**</Check>
+
+- Research projects
+- High-quality requirements
+- Large datasets available (100K+ examples)
+- Multi-GPU or cloud setup
+- Competitive performance needed
+- State-of-the-art results
+
+<Warning>**Requirements:**</Warning>
+
+- Professional GPU (A100 40GB+) or multi-GPU
+- Large dataset (100K+ examples)
+- Days of training time
+- Significant compute budget
+
+## Model Architecture
+
+```python
+{
+  "layers": 24,
+  "heads": 16,
+  "dim": 1024,
+  "vocab_size": 50000,
+  "max_length": 2048,
+  "dropout": 0.1
+}
+```
+
+**Total Parameters:** ~1,073,741,824
+
+## Create BASE Project
+
+```bash
+npx create-llm my-base-llm --template base --tokenizer bpe
+cd my-base-llm
+pip install -r requirements.txt
+```
+
+## Training Configuration
+
+Default `llm.config.js` settings:
+
+```javascript
+module.exports = {
+  model: {
+    type: 'gpt',
+    size: 'base',
+    vocab_size: 50000,
+    max_length: 2048,
+    layers: 24,
+    heads: 16,
+    dim: 1024,
+    dropout: 0.1,
+  },
+  
+  training: {
+    batch_size: 64,
+    learning_rate: 0.0001,
+    warmup_steps: 5000,
+    max_steps: 500000,
+    eval_interval: 5000,
+    save_interval: 10000,
+    mixed_precision: true,
+    gradient_accumulation_steps: 4,
+  },
+};
+```
+
+## Hardware Configurations
+
+<Tabs>
+  <Tab title="Single A100 (40GB)">
+    ```javascript
+    training: {
+      batch_size: 32,
+      gradient_accumulation_steps: 8,
+      mixed_precision: true,
+    }
+    ```
+    Effective batch size: 256
+  </Tab>
+
+  <Tab title="Single A100 (80GB)">
+    ```javascript
+    training: {
+      batch_size: 64,
+      gradient_accumulation_steps: 4,
+      mixed_precision: true,
+    }
+    ```
+    Effective batch size: 256
+  </Tab>
+
+  <Tab title="Multi-GPU (4x A100)">
+    ```javascript
+    training: {
+      batch_size: 128,
+      gradient_accumulation_steps: 2,
+      mixed_precision: true,
+    }
+    ```
+    Effective batch size: 1024
+  </Tab>
+</Tabs>
+
+## Performance Expectations
+
+**Typical metrics:**
+- Training loss: 0.5-1.0
+- Perplexity: 1.5-3.0
+- Generation quality: State-of-the-art
+
+**What to expect:**
+- Exceptional text generation
+- Deep understanding of patterns
+- Highly coherent long-form content
+- Research-grade quality
+- Competitive with commercial models
+
+## Research Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Language Research" icon="flask">
+    Study language understanding and generation
+  </Card>
+  <Card title="Benchmark Testing" icon="chart-bar">
+    Evaluate on standard benchmarks
+  </Card>
+  <Card title="Transfer Learning" icon="arrows-turn-right">
+    Pre-train for downstream tasks
+  </Card>
+  <Card title="Novel Architectures" icon="brain">
+    Experiment with new techniques
+  </Card>
+</CardGroup>
+
+## Training at Scale
+
+<Steps>
+  <Step title="Prepare Large Dataset">
+    ```bash
+    # Ensure you have 100K+ examples
+    python data/prepare.py --validate
+    ```
+  </Step>
+
+  <Step title="Configure Multi-GPU">
+    ```bash
+    # Set environment variables
+    export CUDA_VISIBLE_DEVICES=0,1,2,3
+    ```
+  </Step>
+
+  <Step title="Start Training">
+    ```bash
+    # Launch distributed training
+    python training/train.py --distributed
+    ```
+  </Step>
+
+  <Step title="Monitor Progress">
+    ```bash
+    # TensorBoard
+    tensorboard --logdir=logs/tensorboard
+    
+    # WandB (recommended for long runs)
+    # Automatically logs if configured
+    ```
+  </Step>
+</Steps>
+
+## Cost Estimation
+
+<Info>
+  Training BASE models requires significant compute resources
+</Info>
+
+**Cloud costs (approximate):**
+- AWS p4d.24xlarge (8x A100): $32/hour
+- Google Cloud A2 (8x A100): $30/hour
+- Azure NC A100 v4: $28/hour
+
+**Total training cost:**
+- 3 days training ≈ $2,000-2,500
+- With spot instances: $800-1,200
+
+## Optimization Tips
+
+<AccordionGroup>
+  <Accordion title="Reduce Training Time">
+    - Use larger batch sizes
+    - Enable mixed precision
+    - Use gradient checkpointing
+    - Optimize data loading
+  </Accordion>
+
+  <Accordion title="Reduce Memory Usage">
+    ```javascript
+    training: {
+      gradient_checkpointing: true,
+      mixed_precision: true,
+      max_length: 1024,  // Reduce if needed
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Improve Quality">
+    - Train for 500K+ steps
+    - Use larger vocabulary
+    - Add more diverse data
+    - Fine-tune hyperparameters
+    - Use learning rate scheduling
+  </Accordion>
+
+  <Accordion title="Save Costs">
+    - Use spot/preemptible instances
+    - Enable automatic checkpointing
+    - Monitor training closely
+    - Stop early if not improving
+  </Accordion>
+</AccordionGroup>
+
+## Evaluation
+
+Evaluate your BASE model on standard benchmarks:
+
+```bash
+# Perplexity on test set
+python evaluation/evaluate.py --checkpoint checkpoints/checkpoint-best.pt
+
+# Generate samples
+python evaluation/generate.py --checkpoint checkpoints/checkpoint-best.pt
+
+# Run benchmarks
+python evaluation/benchmark.py --checkpoint checkpoints/checkpoint-best.pt
+```
+
+## Comparison
+
+| Feature | SMALL | **BASE** |
+|---------|-------|----------|
+| Parameters | 100M | **1B** |
+| Training Time | 2 hours | **2 days** |
+| Quality | Excellent | **Best** |
+| Hardware | RTX 3060+ | **A100** |
+| Cost | $0 | **$2000+** |
+| Use Case | Production | **Research** |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Advanced optimization techniques
+  </Card>
+  <Card title="Deployment" icon="rocket" href="/guides/deployment">
+    Deploy your trained model
+  </Card>
+</CardGroup>

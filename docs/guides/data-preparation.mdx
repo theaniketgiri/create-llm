@@ -1,0 +1,273 @@
+---
+title: 'Data Preparation'
+description: 'Preparing high-quality training data for your LLM'
+---
+
+## Data Requirements
+
+<CardGroup cols={2}>
+  <Card title="NANO" icon="atom">
+    100+ examples minimum
+  </Card>
+  <Card title="TINY" icon="cube">
+    1,000+ examples recommended
+  </Card>
+  <Card title="SMALL" icon="box">
+    10,000+ examples required
+  </Card>
+  <Card title="BASE" icon="boxes-stacked">
+    100,000+ examples required
+  </Card>
+</CardGroup>
+
+## Data Format
+
+Place text files in `data/raw/`:
+
+```
+data/raw/
+├── train.txt
+├── val.txt
+└── test.txt
+```
+
+**File format:**
+- Plain text (.txt)
+- UTF-8 encoding
+- One document per file or separated by blank lines
+
+## Data Collection
+
+### Sources
+
+<AccordionGroup>
+  <Accordion title="Public Datasets">
+    - Project Gutenberg (books)
+    - Wikipedia dumps
+    - Common Crawl
+    - GitHub repositories
+    - Reddit comments
+  </Accordion>
+
+  <Accordion title="Custom Data">
+    - Company documents
+    - Customer support logs
+    - Product descriptions
+    - User-generated content
+    - Domain-specific text
+  </Accordion>
+
+  <Accordion title="Synthetic Data">
+    - GPT-4 generated examples
+    - Template-based generation
+    - Data augmentation
+  </Accordion>
+</AccordionGroup>
+
+## Data Cleaning
+
+<Steps>
+  <Step title="Remove Noise">
+    ```python
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # Remove URLs
+    text = re.sub(r'http\S+', '', text)
+    
+    # Remove special characters
+    text = re.sub(r'[^\w\s.,!?-]', '', text)
+    ```
+  </Step>
+
+  <Step title="Normalize Text">
+    ```python
+    # Lowercase (optional)
+    text = text.lower()
+    
+    # Normalize whitespace
+    text = ' '.join(text.split())
+    
+    # Fix encoding issues
+    text = text.encode('utf-8', 'ignore').decode('utf-8')
+    ```
+  </Step>
+
+  <Step title="Remove Duplicates">
+    ```python
+    # Remove exact duplicates
+    unique_texts = list(set(texts))
+    
+    # Remove near-duplicates (using hashing)
+    from datasketch import MinHash, MinHashLSH
+    ```
+  </Step>
+</Steps>
+
+## Data Quality
+
+### Good Data Characteristics
+
+<Check>
+  - Clean and well-formatted
+  - Diverse content
+  - Consistent style
+  - Proper grammar
+  - Representative of use case
+</Check>
+
+### Bad Data Characteristics
+
+<Warning>
+  - HTML/XML tags
+  - Broken encoding
+  - Excessive repetition
+  - Mixed languages (unless intentional)
+  - Corrupted text
+</Warning>
+
+## Data Splitting
+
+Split data into train/validation/test:
+
+```python
+# 80% train, 10% validation, 10% test
+train_size = int(0.8 * len(data))
+val_size = int(0.1 * len(data))
+
+train_data = data[:train_size]
+val_data = data[train_size:train_size+val_size]
+test_data = data[train_size+val_size:]
+```
+
+## Preprocessing Pipeline
+
+```bash
+# 1. Collect data
+cp your-data.txt data/raw/
+
+# 2. Train tokenizer
+python tokenizer/train.py --data data/raw/
+
+# 3. Prepare dataset
+python data/prepare.py
+
+# 4. Verify
+python data/verify.py
+```
+
+## Data Augmentation
+
+Increase dataset size:
+
+### Back-Translation
+```python
+# Translate to another language and back
+text → French → English
+```
+
+### Paraphrasing
+```python
+# Use GPT to rephrase
+"The cat sat on the mat" → "A feline rested on the rug"
+```
+
+### Synonym Replacement
+```python
+# Replace words with synonyms
+"happy" → "joyful", "glad", "pleased"
+```
+
+## Domain-Specific Data
+
+### Code
+```python
+# Collect from GitHub
+- Python files
+- Documentation
+- Comments
+```
+
+### Medical
+```python
+# Use specialized corpora
+- PubMed abstracts
+- Medical textbooks
+- Clinical notes (anonymized)
+```
+
+### Legal
+```python
+# Legal documents
+- Case law
+- Contracts
+- Regulations
+```
+
+## Data Balance
+
+Ensure balanced representation:
+
+```python
+# Check distribution
+categories = count_categories(data)
+print(categories)
+
+# Balance if needed
+balanced_data = balance_dataset(data, target_size=1000)
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start Small">
+    - Begin with 1,000 examples
+    - Verify pipeline works
+    - Scale up gradually
+  </Accordion>
+
+  <Accordion title="Quality Over Quantity">
+    - 1,000 clean examples > 10,000 noisy ones
+    - Manual review sample
+    - Remove low-quality data
+  </Accordion>
+
+  <Accordion title="Diversity">
+    - Multiple sources
+    - Different styles
+    - Various topics
+    - Balanced representation
+  </Accordion>
+
+  <Accordion title="Privacy">
+    - Remove PII (names, emails, addresses)
+    - Anonymize sensitive data
+    - Check licensing
+    - Respect copyright
+  </Accordion>
+</AccordionGroup>
+
+## Validation
+
+Verify data quality:
+
+```bash
+python data/validate.py --data data/raw/
+```
+
+Checks:
+- ✅ Encoding is valid
+- ✅ No corrupted files
+- ✅ Sufficient data size
+- ✅ No excessive duplicates
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Tokenizers" icon="text" href="/concepts/tokenizers">
+    Train your tokenizer
+  </Card>
+  <Card title="Training" icon="graduation-cap" href="/concepts/training">
+    Start training your model
+  </Card>
+</CardGroup>

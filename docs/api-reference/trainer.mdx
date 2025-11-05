@@ -1,0 +1,140 @@
+---
+title: 'Trainer API'
+description: 'Python API for training models'
+---
+
+## Trainer Class
+
+The main training class.
+
+```python
+from training import Trainer
+
+trainer = Trainer(
+    model=model,
+    train_loader=train_loader,
+    val_loader=val_loader,
+    optimizer=optimizer,
+    device='cuda',
+    callbacks=[checkpoint_callback, logging_callback]
+)
+
+trainer.train(max_steps=10000)
+```
+
+### Parameters
+
+- `model` (nn.Module): The model to train
+- `train_loader` (DataLoader): Training data loader
+- `val_loader` (DataLoader, optional): Validation data loader
+- `optimizer` (Optimizer): PyTorch optimizer
+- `device` (str): Device to train on ('cuda' or 'cpu')
+- `callbacks` (list): List of callback objects
+
+### Methods
+
+#### train()
+```python
+trainer.train(max_steps=10000, eval_interval=500)
+```
+
+Start training loop.
+
+#### evaluate()
+```python
+val_loss = trainer.evaluate()
+```
+
+Evaluate on validation set.
+
+#### save_checkpoint()
+```python
+trainer.save_checkpoint('checkpoints/checkpoint-1000.pt')
+```
+
+Save model checkpoint.
+
+#### load_checkpoint()
+```python
+trainer.load_checkpoint('checkpoints/checkpoint-1000.pt')
+```
+
+Load model checkpoint.
+
+## Callbacks
+
+### CheckpointCallback
+
+```python
+from training.callbacks import CheckpointCallback
+
+callback = CheckpointCallback(
+    checkpoint_dir='checkpoints',
+    save_interval=5000,
+    save_total_limit=3,
+    save_best=True
+)
+```
+
+### LoggingCallback
+
+```python
+from training.callbacks import LoggingCallback
+
+callback = LoggingCallback(
+    log_interval=100,
+    log_dir='logs',
+    verbose=True
+)
+```
+
+### TensorBoardCallback
+
+```python
+from training.callbacks import TensorBoardCallback
+
+callback = TensorBoardCallback(
+    log_dir='logs/tensorboard',
+    log_interval=10
+)
+```
+
+## Model Loading
+
+```python
+from models import load_model_from_config, ConfigLoader
+
+# Load config
+config = ConfigLoader('llm.config.js')
+
+# Create model
+model = load_model_from_config(config)
+```
+
+## Data Loading
+
+```python
+from data import LLMDataset, create_dataloader
+
+# Load dataset
+dataset = LLMDataset('data/processed/train.pt', max_length=512)
+
+# Create dataloader
+loader = create_dataloader(
+    dataset,
+    batch_size=16,
+    shuffle=True,
+    num_workers=4
+)
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Callbacks API" icon="code" href="/api-reference/callbacks">
+    Callback reference
+  </Card>
+  <Card title="Examples" icon="book" href="/examples/shakespeare">
+    See code examples
+  </Card>
+</CardGroup>

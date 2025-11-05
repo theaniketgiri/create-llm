@@ -1,0 +1,212 @@
+---
+title: 'Shakespeare Example'
+description: 'Train a model to generate Shakespeare-style text'
+---
+
+## Overview
+
+This example trains a TINY model on Shakespeare's complete works to generate Elizabethan-style text.
+
+## Step-by-Step Guide
+
+<Steps>
+  <Step title="Create Project">
+    ```bash
+    npx create-llm shakespeare-llm --template tiny --tokenizer bpe
+    cd shakespeare-llm
+    pip install -r requirements.txt
+    ```
+  </Step>
+
+  <Step title="Download Data">
+    ```bash
+    # Download Shakespeare's complete works
+    curl https://www.gutenberg.org/files/100/100-0.txt > data/raw/shakespeare.txt
+    
+    # Check file size
+    wc -l data/raw/shakespeare.txt
+    # Should be ~150,000 lines
+    ```
+  </Step>
+
+  <Step title="Train Tokenizer">
+    ```bash
+    python tokenizer/train.py \
+      --data data/raw/ \
+      --vocab-size 10000 \
+      --type bpe
+    ```
+    
+    This creates a vocabulary optimized for Shakespeare's language.
+  </Step>
+
+  <Step title="Prepare Dataset">
+    ```bash
+    python data/prepare.py
+    ```
+    
+    Tokenizes and splits data into train/validation sets.
+  </Step>
+
+  <Step title="Configure Training">
+    Edit `llm.config.js`:
+    ```javascript
+    module.exports = {
+      model: {
+        size: 'tiny',
+        vocab_size: 10000,
+        max_length: 512,
+      },
+      training: {
+        batch_size: 16,
+        learning_rate: 0.0006,
+        max_steps: 10000,
+        eval_interval: 500,
+      },
+    };
+    ```
+  </Step>
+
+  <Step title="Train Model">
+    ```bash
+    python training/train.py
+    ```
+    
+    Training takes ~10-15 minutes on a CPU or ~5 minutes on a GPU.
+    
+    Watch for:
+    - Loss decreasing from ~8 to ~2
+    - Perplexity improving to ~5-7
+  </Step>
+
+  <Step title="Generate Text">
+    ```bash
+    python evaluation/generate.py \
+      --checkpoint checkpoints/checkpoint-best.pt \
+      --prompt "To be or not to be" \
+      --max-length 200 \
+      --temperature 0.8
+    ```
+    
+    Example output:
+    ```
+    To be or not to be, that is the question:
+    Whether 'tis nobler in the mind to suffer
+    The slings and arrows of outrageous fortune,
+    Or to take arms against a sea of troubles...
+    ```
+  </Step>
+
+  <Step title="Interactive Chat">
+    ```bash
+    python chat.py --checkpoint checkpoints/checkpoint-best.pt
+    ```
+    
+    Try prompts like:
+    - "What is love?"
+    - "The meaning of life"
+    - "A rose by any other name"
+  </Step>
+</Steps>
+
+## Results
+
+After training, you should see:
+
+**Metrics:**
+- Training loss: ~2.0
+- Validation loss: ~2.5
+- Perplexity: ~6-8
+- Training time: 10-15 minutes (CPU)
+
+**Generation Quality:**
+- Captures Shakespearean style
+- Uses period-appropriate vocabulary
+- Maintains iambic pentameter (sometimes)
+- Creates coherent sentences
+
+## Example Generations
+
+### Prompt: "To be or not to be"
+
+```
+To be or not to be, that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And by opposing end them.
+```
+
+### Prompt: "What is love?"
+
+```
+What is love? 'Tis not hereafter;
+Present mirth hath present laughter;
+What's to come is still unsure:
+In delay there lies no plenty;
+Then come kiss me, sweet and twenty,
+Youth's a stuff will not endure.
+```
+
+## Customization
+
+### Increase Quality
+
+```javascript
+training: {
+  max_steps: 20000,  // Train longer
+  batch_size: 32,    // Larger batches
+}
+```
+
+### Faster Training
+
+```javascript
+training: {
+  max_steps: 5000,   // Fewer steps
+  batch_size: 8,     // Smaller batches
+}
+```
+
+### Different Style
+
+Try different temperature values:
+- `0.5` - More conservative, closer to training data
+- `0.8` - Balanced (recommended)
+- `1.2` - More creative, less coherent
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Model too repetitive">
+    Increase temperature or add repetition penalty:
+    ```bash
+    --temperature 1.0 --repetition-penalty 1.2
+    ```
+  </Accordion>
+
+  <Accordion title="Poor quality">
+    Train longer or use more data:
+    ```javascript
+    max_steps: 20000
+    ```
+  </Accordion>
+
+  <Accordion title="Out of memory">
+    Reduce batch size:
+    ```javascript
+    batch_size: 8
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Code Generation" icon="code" href="/examples/code-generation">
+    Train on code
+  </Card>
+  <Card title="Chatbot" icon="comments" href="/examples/chatbot">
+    Build a chatbot
+  </Card>
+</CardGroup>

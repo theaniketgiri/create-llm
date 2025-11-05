@@ -1,0 +1,135 @@
+---
+title: Introduction
+description: 'Welcome to create-llm - The fastest way to train your own language model'
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Hero Dark"
+/>
+
+## What is create-llm?
+
+create-llm is a CLI tool that scaffolds production-ready LLM training projects in seconds. Think of it as `create-next-app` but for training custom language models from scratch.
+
+```bash
+npx create-llm my-awesome-llm
+cd my-awesome-llm
+python training/train.py
+```
+
+## Why create-llm?
+
+<CardGroup cols={2}>
+  <Card
+    title="Zero Configuration"
+    icon="bolt"
+    href="/quickstart"
+  >
+    Get started in seconds with smart defaults and automatic setup
+  </Card>
+  <Card
+    title="Right-Sized Templates"
+    icon="layer-group"
+    href="/templates/overview"
+  >
+    Choose from NANO (1M) to BASE (1B) parameters based on your needs
+  </Card>
+  <Card
+    title="Complete Toolkit"
+    icon="toolbox"
+    href="/guides/training-tips"
+  >
+    Everything included: tokenizer, training, evaluation, and deployment
+  </Card>
+  <Card
+    title="Docker Support"
+    icon="docker"
+    href="/guides/docker"
+  >
+    Run anywhere with full Docker and GPU support
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<AccordionGroup>
+  <Accordion icon="rocket" title="Fast Setup">
+    Create a complete LLM training project with a single command. No manual configuration needed.
+  </Accordion>
+  <Accordion icon="brain" title="Smart Defaults">
+    Automatic vocab size detection, sequence length handling, and overfitting warnings.
+  </Accordion>
+  <Accordion icon="chart-line" title="Training Dashboard">
+    Real-time monitoring with TensorBoard integration and live metrics.
+  </Accordion>
+  <Accordion icon="plug" title="Plugin System">
+    Optional integrations with WandB, HuggingFace, and more.
+  </Accordion>
+</AccordionGroup>
+
+## Quick Example
+
+Here's how easy it is to train your first LLM:
+
+<Steps>
+  <Step title="Create Project">
+    ```bash
+    npx create-llm my-llm --template nano
+    ```
+  </Step>
+  <Step title="Add Data">
+    ```bash
+    echo "Your training text" > data/raw/train.txt
+    ```
+  </Step>
+  <Step title="Train">
+    ```bash
+    python training/train.py
+    ```
+  </Step>
+  <Step title="Chat">
+    ```bash
+    python chat.py
+    ```
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart"
+    icon="play"
+    href="/quickstart"
+  >
+    Get your first model trained in 5 minutes
+  </Card>
+  <Card
+    title="Templates"
+    icon="layer-group"
+    href="/templates/overview"
+  >
+    Choose the right template for your project
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/config/overview"
+  >
+    Learn how to customize your training
+  </Card>
+  <Card
+    title="Examples"
+    icon="code"
+    href="/examples/shakespeare"
+  >
+    See real-world examples and use cases
+  </Card>
+</CardGroup>

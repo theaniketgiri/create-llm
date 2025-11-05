@@ -1,0 +1,37 @@
+---
+title: 'Code Generation Example'
+description: 'Train a model for code completion and generation'
+---
+
+## Overview
+
+Train a model on Python code to create an AI coding assistant.
+
+## Quick Start
+
+```bash
+# Create project
+npx create-llm code-llm --template small --tokenizer bpe
+
+# Download Python code
+git clone https://github.com/python/cpython
+cp -r cpython/**/*.py data/raw/
+
+# Train
+python tokenizer/train.py --vocab-size 30000
+python data/prepare.py
+python training/train.py
+```
+
+## Use Cases
+
+- Code completion
+- Function generation
+- Documentation generation
+- Bug fixing suggestions
+
+## Next Steps
+
+<Card title="Chatbot Example" icon="comments" href="/examples/chatbot">
+  Build a conversational AI
+</Card>

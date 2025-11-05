@@ -1,0 +1,235 @@
+---
+title: 'SMALL Template'
+description: '100M parameter model - Production-ready for real applications'
+---
+
+## Overview
+
+The SMALL template is production-ready, offering excellent quality for real-world applications while remaining trainable on consumer hardware.
+
+<CardGroup cols={2}>
+  <Card title="Parameters" icon="hashtag">
+    ~100 Million
+  </Card>
+  <Card title="Training Time" icon="clock">
+    1-3 hours on RTX 3060+
+  </Card>
+  <Card title="Hardware" icon="microchip">
+    RTX 3060+ (12GB VRAM)
+  </Card>
+  <Card title="Data Needed" icon="database">
+    10,000+ examples required
+  </Card>
+</CardGroup>
+
+## When to Use SMALL
+
+<Check>**Perfect for:**</Check>
+
+- Production applications
+- Domain-specific models
+- Real-world deployments
+- Good data availability (10K+ examples)
+- Consumer GPU available (RTX 3060/3070/3080)
+- Quality matters
+
+<Warning>**Requirements:**</Warning>
+
+- GPU with 12GB+ VRAM
+- At least 10,000 training examples
+- Several hours for training
+
+## Model Architecture
+
+```python
+{
+  "layers": 12,
+  "heads": 12,
+  "dim": 768,
+  "vocab_size": 50000,
+  "max_length": 1024,
+  "dropout": 0.1
+}
+```
+
+**Total Parameters:** ~100,663,296
+
+## Create SMALL Project
+
+```bash
+npx create-llm my-small-llm --template small --tokenizer bpe
+cd my-small-llm
+pip install -r requirements.txt
+```
+
+## Training Configuration
+
+Default `llm.config.js` settings:
+
+```javascript
+module.exports = {
+  model: {
+    type: 'gpt',
+    size: 'small',
+    vocab_size: 50000,
+    max_length: 1024,
+    layers: 12,
+    heads: 12,
+    dim: 768,
+    dropout: 0.1,
+  },
+  
+  training: {
+    batch_size: 32,
+    learning_rate: 0.0003,
+    warmup_steps: 2000,
+    max_steps: 100000,
+    eval_interval: 1000,
+    save_interval: 5000,
+    mixed_precision: true,  // Enable FP16
+    gradient_accumulation_steps: 2,
+  },
+};
+```
+
+## GPU Optimization
+
+<Tabs>
+  <Tab title="RTX 3060 (12GB)">
+    ```javascript
+    training: {
+      batch_size: 16,
+      gradient_accumulation_steps: 4,
+      mixed_precision: true,
+    }
+    ```
+  </Tab>
+
+  <Tab title="RTX 3080 (16GB)">
+    ```javascript
+    training: {
+      batch_size: 32,
+      gradient_accumulation_steps: 2,
+      mixed_precision: true,
+    }
+    ```
+  </Tab>
+
+  <Tab title="RTX 4090 (24GB)">
+    ```javascript
+    training: {
+      batch_size: 64,
+      gradient_accumulation_steps: 1,
+      mixed_precision: true,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Performance Expectations
+
+**Typical metrics:**
+- Training loss: 0.8-1.5
+- Perplexity: 2-5
+- Generation quality: High coherence
+
+**What to expect:**
+- Excellent text generation
+- Strong pattern recognition
+- Coherent long-form content
+- Production-grade quality
+
+## Production Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Customer Support" icon="headset">
+    Automated support chatbots
+  </Card>
+  <Card title="Content Generation" icon="newspaper">
+    Blog posts, articles, marketing copy
+  </Card>
+  <Card title="Code Assistant" icon="code">
+    Code completion and generation
+  </Card>
+  <Card title="Document Analysis" icon="file-text">
+    Summarization and extraction
+  </Card>
+</CardGroup>
+
+## Training Best Practices
+
+<AccordionGroup>
+  <Accordion title="Data Preparation">
+    - Clean and deduplicate data
+    - Balance different content types
+    - Use at least 10,000 examples
+    - Split 90% train / 10% validation
+  </Accordion>
+
+  <Accordion title="Monitoring Training">
+    ```bash
+    # Enable TensorBoard
+    python training/train.py
+    
+    # In another terminal
+    tensorboard --logdir=logs/tensorboard
+    ```
+    
+    Watch for:
+    - Decreasing training loss
+    - Stable validation loss
+    - No overfitting (val_loss > train_loss)
+  </Accordion>
+
+  <Accordion title="Handling OOM Errors">
+    If you run out of memory:
+    1. Reduce `batch_size` to 16 or 8
+    2. Increase `gradient_accumulation_steps`
+    3. Reduce `max_length` to 512
+    4. Enable `mixed_precision: true`
+  </Accordion>
+
+  <Accordion title="Improving Quality">
+    - Train for more steps (100K+)
+    - Use larger vocabulary (50K)
+    - Add more diverse data
+    - Fine-tune learning rate
+  </Accordion>
+</AccordionGroup>
+
+## Deployment
+
+Once trained, deploy your SMALL model:
+
+```bash
+# Export to HuggingFace
+python deploy.py --to huggingface --repo-id username/my-model
+
+# Create API endpoint
+python deploy.py --to replicate --model-name my-model
+
+# Docker deployment
+docker build -t my-llm .
+docker run -p 8000:8000 my-llm
+```
+
+## Comparison
+
+| Feature | TINY | **SMALL** | BASE |
+|---------|------|-----------|------|
+| Parameters | 6M | **100M** | 1B |
+| Training Time | 10 min | **2 hours** | 2 days |
+| Quality | Good | **Excellent** | Best |
+| Hardware | CPU | **RTX 3060+** | A100 |
+| Use Case | Prototype | **Production** | Research |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deployment Guide" icon="rocket" href="/guides/deployment">
+    Deploy your trained model
+  </Card>
+  <Card title="BASE Template" icon="boxes-stacked" href="/templates/base">
+    Upgrade for research-grade quality
+  </Card>
+</CardGroup>

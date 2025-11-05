@@ -1,0 +1,140 @@
+---
+title: 'Training Configuration'
+description: 'Configure training hyperparameters'
+---
+
+## Training Settings
+
+```javascript
+training: {
+  batch_size: 16,
+  learning_rate: 0.0006,
+  warmup_steps: 500,
+  max_steps: 10000,
+  eval_interval: 500,
+  save_interval: 2000,
+  optimizer: 'adamw',
+  weight_decay: 0.01,
+  gradient_clip: 1.0,
+  mixed_precision: false,
+  gradient_accumulation_steps: 1,
+}
+```
+
+## Parameters
+
+### batch_size
+**Type:** `number`  
+**Default:** `8` (NANO), `16` (TINY), `32` (SMALL), `64` (BASE)
+
+Number of examples per training step. Larger = more stable but needs more memory.
+
+### learning_rate
+**Type:** `number`  
+**Default:** `0.0005` (NANO), `0.0006` (TINY), `0.0003` (SMALL), `0.0001` (BASE)
+
+Step size for weight updates. Most important hyperparameter.
+
+<Tip>
+  If loss doesn't decrease, try reducing by 10x
+</Tip>
+
+### warmup_steps
+**Type:** `number`  
+**Default:** `100` (NANO), `500` (TINY), `2000` (SMALL), `5000` (BASE)
+
+Steps to gradually increase learning rate from 0 to target.
+
+### max_steps
+**Type:** `number`  
+**Default:** `1000` (NANO), `10000` (TINY), `100000` (SMALL), `500000` (BASE)
+
+Total number of training steps.
+
+### eval_interval
+**Type:** `number`  
+**Default:** `200` (NANO), `500` (TINY), `1000` (SMALL), `5000` (BASE)
+
+Evaluate on validation set every N steps.
+
+### save_interval
+**Type:** `number`  
+**Default:** `500` (NANO), `2000` (TINY), `5000` (SMALL), `10000` (BASE)
+
+Save checkpoint every N steps.
+
+### optimizer
+**Type:** `string`  
+**Options:** `'adamw'`, `'adam'`, `'sgd'`  
+**Default:** `'adamw'`
+
+Optimization algorithm. AdamW is recommended.
+
+### weight_decay
+**Type:** `number`  
+**Default:** `0.01`
+
+L2 regularization strength.
+
+### gradient_clip
+**Type:** `number`  
+**Default:** `1.0`
+
+Maximum gradient norm. Prevents exploding gradients.
+
+### mixed_precision
+**Type:** `boolean`  
+**Default:** `false`
+
+Enable FP16 training for 2x speedup on GPU.
+
+<Check>
+  Enable this on GPU for faster training
+</Check>
+
+### gradient_accumulation_steps
+**Type:** `number`  
+**Default:** `1`
+
+Accumulate gradients over N steps. Simulates larger batch size.
+
+## Examples
+
+### Fast Training (CPU)
+```javascript
+training: {
+  batch_size: 8,
+  max_steps: 1000,
+  gradient_accumulation_steps: 4,  // Effective batch = 32
+  mixed_precision: false,
+}
+```
+
+### GPU Optimized
+```javascript
+training: {
+  batch_size: 32,
+  mixed_precision: true,
+  gradient_accumulation_steps: 2,  // Effective batch = 64
+}
+```
+
+### Memory Constrained
+```javascript
+training: {
+  batch_size: 4,
+  gradient_accumulation_steps: 8,  // Effective batch = 32
+  mixed_precision: true,
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Data Config" icon="database" href="/config/data">
+    Configure data processing
+  </Card>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Optimization tips
+  </Card>
+</CardGroup>

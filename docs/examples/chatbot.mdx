@@ -1,0 +1,43 @@
+---
+title: 'Chatbot Example'
+description: 'Build a conversational AI chatbot'
+---
+
+## Overview
+
+Create a chatbot trained on conversational data.
+
+## Quick Start
+
+```bash
+# Create project
+npx create-llm chatbot-llm --template tiny --tokenizer bpe
+
+# Add conversational data
+# Format: Q: question\nA: answer\n\n
+echo "Q: Hello\nA: Hi there!\n\n" > data/raw/chat.txt
+
+# Train
+python tokenizer/train.py
+python data/prepare.py
+python training/train.py
+
+# Launch chat interface
+python chat.py --ui
+```
+
+## Data Format
+
+```
+Q: What is your name?
+A: I'm an AI assistant created to help you.
+
+Q: How are you?
+A: I'm doing well, thank you for asking!
+```
+
+## Next Steps
+
+<Card title="Shakespeare Example" icon="book" href="/examples/shakespeare">
+  Generate creative text
+</Card>

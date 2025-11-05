@@ -1,0 +1,67 @@
+---
+title: 'Data Configuration'
+description: 'Configure data processing and loading'
+---
+
+## Data Settings
+
+```javascript
+data: {
+  train_path: 'data/raw/train.txt',
+  val_path: 'data/raw/val.txt',
+  max_length: 512,
+  stride: 256,
+  val_split: 0.1,
+  shuffle: true,
+}
+```
+
+## Parameters
+
+### train_path
+**Type:** `string`  
+**Default:** `'data/raw/train.txt'`
+
+Path to training data file(s).
+
+### val_path
+**Type:** `string`  
+**Default:** `'data/raw/val.txt'`
+
+Path to validation data file(s). Optional.
+
+### max_length
+**Type:** `number`  
+**Default:** `256` (NANO), `512` (TINY), `1024` (SMALL), `2048` (BASE)
+
+Maximum sequence length for training examples.
+
+### stride
+**Type:** `number`  
+**Default:** `max_length / 2`
+
+Sliding window stride for creating overlapping sequences.
+
+### val_split
+**Type:** `number`  
+**Range:** `0.0` to `1.0`  
+**Default:** `0.1`
+
+Fraction of data to use for validation if no val_path provided.
+
+### shuffle
+**Type:** `boolean`  
+**Default:** `true`
+
+Shuffle training data each epoch.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Data Preparation" icon="database" href="/guides/data-preparation">
+    Prepare your data
+  </Card>
+  <Card title="Tokenizers" icon="text" href="/concepts/tokenizers">
+    Configure tokenizer
+  </Card>
+</CardGroup>

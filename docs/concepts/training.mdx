@@ -1,0 +1,286 @@
+---
+title: 'Training'
+description: 'Understanding the training process in create-llm'
+---
+
+## Training Overview
+
+Training teaches the model to predict the next token in a sequence by minimizing prediction errors across your dataset.
+
+## Training Loop
+
+```python
+for epoch in range(num_epochs):
+    for batch in dataloader:
+        # Forward pass
+        logits = model(batch.input_ids)
+        loss = criterion(logits, batch.labels)
+        
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+```
+
+## Key Concepts
+
+<CardGroup cols={2}>
+  <Card title="Loss Function" icon="chart-line">
+    Cross-entropy loss measures prediction error
+  </Card>
+  <Card title="Optimizer" icon="gears">
+    AdamW updates model weights
+  </Card>
+  <Card title="Learning Rate" icon="gauge">
+    Controls update step size
+  </Card>
+  <Card title="Batch Size" icon="layer-group">
+    Number of examples per update
+  </Card>
+</CardGroup>
+
+## Training Phases
+
+### 1. Warmup Phase
+
+Gradually increase learning rate from 0 to target:
+
+```
+Steps 0-500: LR increases from 0 to 0.0006
+```
+
+**Purpose:** Stabilizes early training
+
+### 2. Training Phase
+
+Maintain constant or decaying learning rate:
+
+```
+Steps 500-10000: LR = 0.0006 (constant)
+```
+
+**Purpose:** Main learning happens here
+
+### 3. Cooldown Phase (Optional)
+
+Decrease learning rate for fine-tuning:
+
+```
+Steps 10000-12000: LR decreases to 0.00001
+```
+
+**Purpose:** Refine final weights
+
+## Hyperparameters
+
+### Learning Rate
+
+Controls how much weights change per update:
+
+```javascript
+learning_rate: 0.0006  // Typical for TINY
+learning_rate: 0.0003  // Typical for SMALL
+learning_rate: 0.0001  // Typical for BASE
+```
+
+<Tip>
+  Start with template defaults, adjust if loss doesn't decrease
+</Tip>
+
+### Batch Size
+
+Number of examples processed together:
+
+```javascript
+batch_size: 8   // NANO (CPU)
+batch_size: 16  // TINY (CPU/GPU)
+batch_size: 32  // SMALL (GPU)
+batch_size: 64  // BASE (Multi-GPU)
+```
+
+<Info>
+  Larger batch = more stable but needs more memory
+</Info>
+
+### Gradient Accumulation
+
+Simulate larger batches:
+
+```javascript
+batch_size: 8
+gradient_accumulation_steps: 4
+// Effective batch size = 32
+```
+
+### Training Steps
+
+Total number of weight updates:
+
+```javascript
+max_steps: 1000    // NANO (quick test)
+max_steps: 10000   // TINY (prototype)
+max_steps: 100000  // SMALL (production)
+max_steps: 500000  // BASE (research)
+```
+
+## Monitoring Training
+
+### TensorBoard
+
+```bash
+# Start training
+python training/train.py
+
+# View metrics (in another terminal)
+tensorboard --logdir=logs/tensorboard
+```
+
+Open http://localhost:6006 to see:
+- Training loss curve
+- Learning rate schedule
+- Tokens per second
+- GPU utilization
+
+### Console Output
+
+```
+Step    Loss      LR        Tokens/s  Time
+100     4.2341    0.0002    1234      00:01:23
+200     3.8912    0.0004    1256      00:02:45
+300     3.5234    0.0006    1289      00:04:12
+```
+
+## Callbacks
+
+create-llm includes several training callbacks:
+
+<AccordionGroup>
+  <Accordion title="CheckpointCallback">
+    Saves model at regular intervals
+    ```javascript
+    save_interval: 5000  // Save every 5000 steps
+    ```
+  </Accordion>
+
+  <Accordion title="LoggingCallback">
+    Logs metrics to console and file
+    ```javascript
+    log_interval: 100  // Log every 100 steps
+    ```
+  </Accordion>
+
+  <Accordion title="TensorBoardCallback">
+    Visualizes training in TensorBoard
+    ```javascript
+    tensorboard: true  // Enable TensorBoard
+    ```
+  </Accordion>
+
+  <Accordion title="EarlyStoppingCallback">
+    Stops if validation loss stops improving
+    ```javascript
+    patience: 5  // Stop after 5 evaluations without improvement
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Evaluation
+
+Periodic evaluation on validation set:
+
+```javascript
+eval_interval: 500  // Evaluate every 500 steps
+```
+
+**Metrics:**
+- Validation loss
+- Perplexity
+- Sample generations
+
+## Checkpointing
+
+Models are saved automatically:
+
+```
+checkpoints/
+├── checkpoint-1000.pt   # Regular checkpoint
+├── checkpoint-2000.pt
+├── checkpoint-best.pt   # Best validation loss
+└── checkpoint-final.pt  # End of training
+```
+
+## Resume Training
+
+Continue from a checkpoint:
+
+```bash
+python training/train.py --resume checkpoints/checkpoint-5000.pt
+```
+
+## Mixed Precision Training
+
+Use FP16 for faster training:
+
+```javascript
+mixed_precision: true  // Enable on GPU
+```
+
+**Benefits:**
+- 2x faster training
+- 50% less memory
+- Minimal quality loss
+
+## Distributed Training
+
+Train on multiple GPUs:
+
+```bash
+# Set visible GPUs
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
+# Launch training
+python training/train.py --distributed
+```
+
+## Common Training Issues
+
+<AccordionGroup>
+  <Accordion title="Loss Not Decreasing">
+    - Check learning rate (try 1e-4 to 1e-3)
+    - Verify data is loading correctly
+    - Increase warmup steps
+    - Check for data preprocessing issues
+  </Accordion>
+
+  <Accordion title="Loss Exploding">
+    - Reduce learning rate
+    - Enable gradient clipping
+    - Check for corrupted data
+    - Increase warmup period
+  </Accordion>
+
+  <Accordion title="Overfitting">
+    - Add more training data
+    - Increase dropout
+    - Use smaller model
+    - Add regularization
+  </Accordion>
+
+  <Accordion title="Out of Memory">
+    - Reduce batch_size
+    - Enable mixed_precision
+    - Increase gradient_accumulation_steps
+    - Reduce max_length
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Evaluation" icon="chart-bar" href="/concepts/evaluation">
+    Learn about model evaluation
+  </Card>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Advanced optimization techniques
+  </Card>
+</CardGroup>

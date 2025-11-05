@@ -1,0 +1,150 @@
+---
+title: 'Configuration Overview'
+description: 'Understanding llm.config.js configuration file'
+---
+
+## Configuration File
+
+All settings are controlled via `llm.config.js`:
+
+```javascript
+module.exports = {
+  model: { /* Model architecture */ },
+  training: { /* Training hyperparameters */ },
+  data: { /* Data processing */ },
+  tokenizer: { /* Tokenizer settings */ },
+  checkpoints: { /* Checkpoint management */ },
+  logging: { /* Logging and monitoring */ },
+  plugins: [ /* Optional integrations */ ],
+};
+```
+
+## Configuration Sections
+
+<CardGroup cols={2}>
+  <Card title="Model" icon="brain" href="/config/model">
+    Architecture and model size
+  </Card>
+  <Card title="Training" icon="graduation-cap" href="/config/training">
+    Training hyperparameters
+  </Card>
+  <Card title="Data" icon="database" href="/config/data">
+    Data processing settings
+  </Card>
+  <Card title="Tokenizer" icon="text">
+    Tokenization configuration
+  </Card>
+</CardGroup>
+
+## Quick Reference
+
+### Model Configuration
+```javascript
+model: {
+  type: 'gpt',              // Architecture type
+  size: 'tiny',             // Template size
+  vocab_size: 10000,        // Vocabulary size
+  max_length: 512,          // Max sequence length
+  layers: 4,                // Number of layers
+  heads: 4,                 // Attention heads
+  dim: 256,                 // Model dimension
+  dropout: 0.2,             // Dropout rate
+}
+```
+
+### Training Configuration
+```javascript
+training: {
+  batch_size: 16,           // Batch size
+  learning_rate: 0.0006,    // Learning rate
+  warmup_steps: 500,        // Warmup steps
+  max_steps: 10000,         // Max training steps
+  eval_interval: 500,       // Evaluation frequency
+  save_interval: 2000,      // Checkpoint frequency
+  mixed_precision: false,   // FP16 training
+  gradient_accumulation_steps: 1,
+}
+```
+
+### Data Configuration
+```javascript
+data: {
+  train_path: 'data/raw/train.txt',
+  val_path: 'data/raw/val.txt',
+  max_length: 512,
+  stride: 256,
+  val_split: 0.1,
+  shuffle: true,
+}
+```
+
+## Environment Variables
+
+Override config with environment variables:
+
+```bash
+# Override learning rate
+export LLM_LEARNING_RATE=0.001
+
+# Override batch size
+export LLM_BATCH_SIZE=32
+
+# Run training
+python training/train.py
+```
+
+## Command Line Arguments
+
+Override config from command line:
+
+```bash
+python training/train.py \
+  --batch-size 32 \
+  --learning-rate 0.001 \
+  --max-steps 5000
+```
+
+## Configuration Validation
+
+create-llm validates your configuration:
+
+<Check>
+  - Vocab size matches tokenizer
+  - Sequence length is valid
+  - Model size fits in memory
+  - Hyperparameters are reasonable
+</Check>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start with Defaults">
+    Template defaults are well-tested - start there
+  </Accordion>
+
+  <Accordion title="Change One Thing">
+    Modify one parameter at a time to understand impact
+  </Accordion>
+
+  <Accordion title="Document Changes">
+    Comment your config changes
+    ```javascript
+    learning_rate: 0.001,  // Increased from 0.0006 for faster convergence
+    ```
+  </Accordion>
+
+  <Accordion title="Version Control">
+    Commit config changes with your code
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Model Config" icon="brain" href="/config/model">
+    Model architecture settings
+  </Card>
+  <Card title="Training Config" icon="graduation-cap" href="/config/training">
+    Training hyperparameters
+  </Card>
+</CardGroup>

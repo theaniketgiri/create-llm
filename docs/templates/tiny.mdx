@@ -1,0 +1,173 @@
+---
+title: 'TINY Template'
+description: '6M parameter model - Great for prototyping and small projects'
+---
+
+## Overview
+
+The TINY template offers a good balance between training speed and model quality, perfect for prototyping and small-scale projects.
+
+<CardGroup cols={2}>
+  <Card title="Parameters" icon="hashtag">
+    ~6 Million
+  </Card>
+  <Card title="Training Time" icon="clock">
+    5-15 minutes on CPU/GPU
+  </Card>
+  <Card title="Hardware" icon="microchip">
+    CPU or basic GPU (4GB RAM)
+  </Card>
+  <Card title="Data Needed" icon="database">
+    1,000+ examples recommended
+  </Card>
+</CardGroup>
+
+## When to Use TINY
+
+<Check>**Perfect for:**</Check>
+
+- Prototyping before scaling up
+- Small-scale projects
+- Personal experiments
+- Limited data (1K-10K examples)
+- CPU-only or basic GPU environments
+- Quick iterations
+
+<Warning>**Consider upgrading if:**</Warning>
+
+- You have 10K+ examples
+- Need production-grade quality
+- Have access to better GPU
+
+## Model Architecture
+
+```python
+{
+  "layers": 4,
+  "heads": 4,
+  "dim": 256,
+  "vocab_size": 10000,
+  "max_length": 512,
+  "dropout": 0.2
+}
+```
+
+**Total Parameters:** ~6,291,456
+
+## Create TINY Project
+
+```bash
+npx create-llm my-tiny-llm --template tiny --tokenizer bpe
+cd my-tiny-llm
+pip install -r requirements.txt
+```
+
+## Training Configuration
+
+Default `llm.config.js` settings:
+
+```javascript
+module.exports = {
+  model: {
+    type: 'gpt',
+    size: 'tiny',
+    vocab_size: 10000,
+    max_length: 512,
+    layers: 4,
+    heads: 4,
+    dim: 256,
+    dropout: 0.2,
+  },
+  
+  training: {
+    batch_size: 16,
+    learning_rate: 0.0006,
+    warmup_steps: 500,
+    max_steps: 10000,
+    eval_interval: 500,
+    save_interval: 2000,
+    gradient_accumulation_steps: 1,
+  },
+};
+```
+
+## Performance Expectations
+
+**Typical metrics:**
+- Training loss: 1.5-2.5
+- Perplexity: 4-10
+- Generation quality: Decent coherence
+
+**What to expect:**
+- Better text generation than NANO
+- Improved pattern recognition
+- More coherent longer sequences
+- Good for domain-specific tasks
+
+## Example Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Code Completion" icon="code">
+    Train on your codebase for autocomplete
+  </Card>
+  <Card title="Text Classification" icon="tags">
+    Fine-tune for specific classification tasks
+  </Card>
+  <Card title="Simple Chatbot" icon="comments">
+    Create basic conversational agents
+  </Card>
+  <Card title="Text Generation" icon="pen">
+    Generate domain-specific content
+  </Card>
+</CardGroup>
+
+## Training Tips
+
+<AccordionGroup>
+  <Accordion title="Optimize for CPU">
+    ```javascript
+    training: {
+      batch_size: 8,  // Reduce for CPU
+      gradient_accumulation_steps: 2,  // Simulate larger batch
+      mixed_precision: false,  // CPU doesn't support FP16
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Optimize for GPU">
+    ```javascript
+    training: {
+      batch_size: 32,  // Increase for GPU
+      mixed_precision: true,  // Enable FP16
+      gradient_accumulation_steps: 1,
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Prevent Overfitting">
+    - Use validation split (10%)
+    - Monitor validation loss
+    - Increase dropout to 0.3 if needed
+    - Add more training data
+  </Accordion>
+</AccordionGroup>
+
+## Comparison with Other Templates
+
+| Feature | NANO | **TINY** | SMALL |
+|---------|------|----------|-------|
+| Parameters | 1M | **6M** | 100M |
+| Training Time | 2 min | **10 min** | 2 hours |
+| Quality | Basic | **Good** | Excellent |
+| Hardware | Any CPU | **CPU/Basic GPU** | RTX 3060+ |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training Guide" icon="book" href="/guides/training-tips">
+    Learn optimization techniques
+  </Card>
+  <Card title="SMALL Template" icon="box" href="/templates/small">
+    Upgrade for production use
+  </Card>
+</CardGroup>

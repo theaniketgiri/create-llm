@@ -1,0 +1,165 @@
+---
+title: 'CLI Reference'
+description: 'Command-line interface documentation'
+---
+
+## create-llm
+
+Create a new LLM training project.
+
+### Usage
+
+```bash
+npx create-llm [project-name] [options]
+```
+
+### Arguments
+
+| Argument | Description | Required |
+|----------|-------------|----------|
+| `project-name` | Name of the project directory | No |
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--template <name>` | Template to use (nano, tiny, small, base, custom) | Interactive prompt |
+| `--tokenizer <type>` | Tokenizer type (bpe, wordpiece, unigram) | Interactive prompt |
+| `--skip-install` | Skip npm/pip installation | `false` |
+| `-y, --yes` | Skip all prompts, use defaults | `false` |
+| `-h, --help` | Show help message | - |
+| `-v, --version` | Show version number | - |
+
+### Examples
+
+```bash
+# Interactive mode
+npx create-llm
+
+# With project name
+npx create-llm my-project
+
+# Specify all options
+npx create-llm my-project --template nano --tokenizer bpe --skip-install
+
+# Skip prompts
+npx create-llm my-project -y
+```
+
+## Training Commands
+
+### train.py
+
+Train the model.
+
+```bash
+python training/train.py [options]
+```
+
+**Options:**
+- `--config <path>` - Config file path (default: llm.config.js)
+- `--resume <path>` - Resume from checkpoint
+- `--device <device>` - Device to use (cuda/cpu/auto)
+- `--max-steps <n>` - Override max training steps
+
+### evaluate.py
+
+Evaluate the model.
+
+```bash
+python evaluation/evaluate.py --checkpoint <path> [options]
+```
+
+**Options:**
+- `--checkpoint <path>` - Path to checkpoint (required)
+- `--data <path>` - Validation data path
+- `--batch-size <n>` - Batch size for evaluation
+
+### generate.py
+
+Generate text.
+
+```bash
+python evaluation/generate.py --checkpoint <path> --prompt <text> [options]
+```
+
+**Options:**
+- `--checkpoint <path>` - Path to checkpoint (required)
+- `--prompt <text>` - Input prompt (required)
+- `--max-length <n>` - Maximum generation length (default: 100)
+- `--temperature <f>` - Sampling temperature (default: 0.8)
+- `--top-k <n>` - Top-k sampling (default: 50)
+- `--top-p <f>` - Nucleus sampling (default: 0.9)
+- `--num-samples <n>` - Number of samples to generate (default: 1)
+
+## Data Commands
+
+### prepare.py
+
+Prepare training data.
+
+```bash
+python data/prepare.py [options]
+```
+
+**Options:**
+- `--data <path>` - Raw data directory
+- `--output <path>` - Output directory
+- `--max-length <n>` - Maximum sequence length
+
+### tokenizer/train.py
+
+Train tokenizer.
+
+```bash
+python tokenizer/train.py [options]
+```
+
+**Options:**
+- `--data <path>` - Training data directory
+- `--vocab-size <n>` - Vocabulary size
+- `--type <type>` - Tokenizer type (bpe/wordpiece/unigram)
+- `--output <path>` - Output path
+
+## Deployment Commands
+
+### deploy.py
+
+Deploy trained model.
+
+```bash
+python deploy.py --to <platform> [options]
+```
+
+**Options:**
+- `--to <platform>` - Deployment platform (huggingface/replicate)
+- `--checkpoint <path>` - Checkpoint to deploy
+- `--repo-id <id>` - Repository ID (for HuggingFace)
+- `--model-name <name>` - Model name (for Replicate)
+
+## Chat Interface
+
+### chat.py
+
+Interactive chat interface.
+
+```bash
+python chat.py --checkpoint <path> [options]
+```
+
+**Options:**
+- `--checkpoint <path>` - Path to checkpoint (required)
+- `--ui` - Launch web UI (Gradio)
+- `--port <n>` - Port for web UI (default: 7860)
+- `--temperature <f>` - Sampling temperature (default: 0.8)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Trainer API" icon="code" href="/api-reference/trainer">
+    Python API reference
+  </Card>
+  <Card title="Examples" icon="book" href="/examples/shakespeare">
+    See usage examples
+  </Card>
+</CardGroup>

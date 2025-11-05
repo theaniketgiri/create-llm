@@ -1,0 +1,192 @@
+---
+title: 'Tokenizers'
+description: 'Understanding tokenization in create-llm'
+---
+
+## What is Tokenization?
+
+Tokenization converts text into numerical tokens that the model can process.
+
+```
+"Hello world!" → [15496, 995, 0]
+```
+
+## Available Tokenizers
+
+create-llm supports three tokenization algorithms:
+
+<CardGroup cols={3}>
+  <Card title="BPE" icon="b">
+    Byte Pair Encoding - Most popular
+  </Card>
+  <Card title="WordPiece" icon="w">
+    Used by BERT - Good for morphology
+  </Card>
+  <Card title="Unigram" icon="u">
+    Probabilistic - Flexible vocabulary
+  </Card>
+</CardGroup>
+
+## BPE (Byte Pair Encoding)
+
+**How it works:**
+1. Start with character-level tokens
+2. Iteratively merge most frequent pairs
+3. Build vocabulary of subwords
+
+**Example:**
+```
+"unhappiness" → ["un", "happi", "ness"]
+```
+
+**Best for:**
+- General text generation
+- Handling rare words
+- Most use cases (recommended)
+
+## WordPiece
+
+**How it works:**
+1. Similar to BPE
+2. Uses likelihood-based merging
+3. Adds ## prefix for subwords
+
+**Example:**
+```
+"unhappiness" → ["un", "##happiness"]
+```
+
+**Best for:**
+- Morphologically rich languages
+- When word structure matters
+- BERT-style models
+
+## Unigram
+
+**How it works:**
+1. Start with large vocabulary
+2. Probabilistically remove tokens
+3. Keep most useful subwords
+
+**Example:**
+```
+"unhappiness" → ["un", "happy", "ness"]
+```
+
+**Best for:**
+- Multiple segmentation options
+- Asian languages
+- Flexible tokenization
+
+## Training a Tokenizer
+
+<Steps>
+  <Step title="Prepare Data">
+    ```bash
+    # Add your text files
+    cp your-data.txt data/raw/
+    ```
+  </Step>
+
+  <Step title="Train Tokenizer">
+    ```bash
+    python tokenizer/train.py \
+      --data data/raw/ \
+      --vocab-size 10000 \
+      --type bpe
+    ```
+  </Step>
+
+  <Step title="Verify">
+    ```bash
+    python tokenizer/test.py
+    ```
+  </Step>
+</Steps>
+
+## Vocabulary Size
+
+Choosing the right vocabulary size:
+
+| Vocab Size | Use Case | Pros | Cons |
+|------------|----------|------|------|
+| 2,000-5,000 | NANO/Learning | Fast, simple | Limited expressiveness |
+| 10,000-20,000 | TINY/Prototypes | Balanced | Good for most cases |
+| 30,000-50,000 | SMALL/Production | Rich vocabulary | Slower, more memory |
+| 50,000+ | BASE/Research | Maximum coverage | Expensive |
+
+## Special Tokens
+
+create-llm uses these special tokens:
+
+```python
+{
+  "<pad>": 0,    # Padding token
+  "<unk>": 1,    # Unknown token
+  "<s>": 2,      # Start of sequence
+  "</s>": 3,     # End of sequence
+}
+```
+
+## Tokenization Example
+
+```python
+from tokenizers import Tokenizer
+
+# Load trained tokenizer
+tokenizer = Tokenizer.from_file("tokenizer/tokenizer.json")
+
+# Encode text
+text = "Hello, world!"
+encoding = tokenizer.encode(text)
+print(encoding.tokens)  # ['Hello', ',', 'world', '!']
+print(encoding.ids)     # [1234, 5, 678, 9]
+
+# Decode tokens
+decoded = tokenizer.decode(encoding.ids)
+print(decoded)  # "Hello, world!"
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Vocabulary Size">
+    - Start small (5K-10K) for prototyping
+    - Increase for production (30K-50K)
+    - Match your data size and diversity
+  </Accordion>
+
+  <Accordion title="Training Data">
+    - Use representative text samples
+    - Include diverse content types
+    - At least 1MB of text recommended
+    - Clean and preprocess data
+  </Accordion>
+
+  <Accordion title="Tokenizer Choice">
+    - **BPE**: Default choice, works well for most cases
+    - **WordPiece**: If you need word-level understanding
+    - **Unigram**: For Asian languages or flexibility
+  </Accordion>
+</AccordionGroup>
+
+## Common Issues
+
+<Warning>
+  **Vocab size mismatch**: create-llm automatically detects and fixes this
+</Warning>
+
+<Info>
+  **Unknown tokens**: Increase vocab size or improve training data
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training" icon="graduation-cap" href="/concepts/training">
+    Learn about model training
+  </Card>
+  <Card title="Data Preparation" icon="database" href="/guides/data-preparation">
+    Prepare your training data
+  </Card>
+</CardGroup>

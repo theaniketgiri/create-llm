@@ -1,0 +1,213 @@
+---
+title: 'Docker Guide'
+description: 'Complete guide to using create-llm with Docker'
+---
+
+## Why Docker?
+
+<CardGroup cols={2}>
+  <Card title="No Dependencies" icon="check">
+    Skip Node.js and Python installation
+  </Card>
+  <Card title="Consistent" icon="equals">
+    Same environment everywhere
+  </Card>
+  <Card title="GPU Support" icon="microchip">
+    Automatic NVIDIA GPU detection
+  </Card>
+  <Card title="Portable" icon="box">
+    Deploy anywhere Docker runs
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+```bash
+# Pull image
+docker pull ghcr.io/theaniketgiri/create-llm:latest
+
+# Create project
+docker run -it -v $(pwd):/workspace ghcr.io/theaniketgiri/create-llm my-project
+
+# Train model
+cd my-project
+docker run --gpus all -v $(pwd):/workspace ghcr.io/theaniketgiri/create-llm train
+```
+
+## Available Images
+
+| Image | Use Case | Size |
+|-------|----------|------|
+| `create-llm:latest` | All-in-one | ~5GB |
+| `create-llm:cli` | CLI only | ~500MB |
+| `create-llm:training` | Training with GPU | ~8GB |
+
+## Docker Compose
+
+Create `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  create-llm:
+    image: ghcr.io/theaniketgiri/create-llm:latest
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: bash
+    
+  training:
+    image: ghcr.io/theaniketgiri/create-llm:training
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+```
+
+Usage:
+```bash
+# Create project
+docker-compose run create-llm npx create-llm my-project
+
+# Train
+docker-compose run training python training/train.py
+```
+
+## GPU Support
+
+### Prerequisites
+
+1. Install NVIDIA drivers
+2. Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+
+### Verify GPU
+
+```bash
+docker run --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
+```
+
+### Run with GPU
+
+```bash
+docker run --gpus all -v $(pwd):/workspace create-llm:training python training/train.py
+```
+
+## Building Custom Images
+
+### Dockerfile
+
+```dockerfile
+FROM ghcr.io/theaniketgiri/create-llm:latest
+
+# Add custom dependencies
+RUN pip install custom-package
+
+# Copy custom code
+COPY custom_module/ /app/custom_module/
+
+# Set environment
+ENV CUSTOM_VAR=value
+```
+
+Build:
+```bash
+docker build -t my-custom-llm .
+```
+
+## Development Workflow
+
+```bash
+# Start development container
+docker run -it -v $(pwd):/workspace create-llm:latest bash
+
+# Inside container
+cd /workspace
+npx create-llm my-project
+cd my-project
+pip install -r requirements.txt
+python training/train.py
+```
+
+## Production Deployment
+
+### Multi-stage Build
+
+```dockerfile
+# Build stage
+FROM python:3.11-slim as builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user -r requirements.txt
+
+# Runtime stage
+FROM python:3.11-slim
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+COPY . .
+ENV PATH=/root/.local/bin:$PATH
+CMD ["python", "api.py"]
+```
+
+## Makefile Commands
+
+```makefile
+# Build
+build:
+	docker build -t create-llm .
+
+# Run CLI
+cli:
+	docker run -it -v $(PWD):/workspace create-llm
+
+# Train
+train:
+	docker run --gpus all -v $(PWD):/workspace create-llm python training/train.py
+
+# Chat
+chat:
+	docker run -p 7860:7860 -v $(PWD):/workspace create-llm python chat.py --ui
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="GPU not detected">
+    1. Check NVIDIA drivers: `nvidia-smi`
+    2. Install NVIDIA Container Toolkit
+    3. Restart Docker daemon
+    4. Use `--gpus all` flag
+  </Accordion>
+
+  <Accordion title="Permission denied">
+    ```bash
+    # Add user to docker group
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+  </Accordion>
+
+  <Accordion title="Out of disk space">
+    ```bash
+    # Clean up
+    docker system prune -a
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deployment" icon="rocket" href="/guides/deployment">
+    Deploy to production
+  </Card>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Optimize training
+  </Card>
+</CardGroup>

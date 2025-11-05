@@ -1,0 +1,120 @@
+---
+title: 'Model Configuration'
+description: 'Configure your model architecture'
+---
+
+## Model Settings
+
+```javascript
+model: {
+  type: 'gpt',
+  size: 'tiny',
+  vocab_size: 10000,
+  max_length: 512,
+  layers: 4,
+  heads: 4,
+  dim: 256,
+  dropout: 0.2,
+}
+```
+
+## Parameters
+
+### type
+**Type:** `string`  
+**Options:** `'gpt'`, `'bert'`, `'t5'`  
+**Default:** `'gpt'`
+
+Architecture type. Currently only GPT is fully supported.
+
+### size
+**Type:** `string`  
+**Options:** `'nano'`, `'tiny'`, `'small'`, `'base'`, `'custom'`  
+**Default:** Based on template
+
+Pre-configured model size. Use `'custom'` for manual configuration.
+
+### vocab_size
+**Type:** `number`  
+**Default:** Auto-detected from tokenizer
+
+Number of tokens in vocabulary. Automatically set to match your trained tokenizer.
+
+<Info>
+  This is auto-detected - you rarely need to set it manually
+</Info>
+
+### max_length
+**Type:** `number`  
+**Default:** `256` (NANO), `512` (TINY), `1024` (SMALL), `2048` (BASE)
+
+Maximum sequence length the model can process.
+
+<Warning>
+  Longer sequences require more memory (quadratic with attention)
+</Warning>
+
+### layers
+**Type:** `number`  
+**Default:** `3` (NANO), `4` (TINY), `12` (SMALL), `24` (BASE)
+
+Number of transformer layers. More layers = deeper understanding but slower training.
+
+### heads
+**Type:** `number`  
+**Default:** `4` (NANO/TINY), `12` (SMALL), `16` (BASE)
+
+Number of attention heads. Must divide evenly into `dim`.
+
+<Tip>
+  heads * head_dim = dim
+</Tip>
+
+### dim
+**Type:** `number`  
+**Default:** `128` (NANO), `256` (TINY), `768` (SMALL), `1024` (BASE)
+
+Model dimension (hidden size). Larger = more capacity but more memory.
+
+### dropout
+**Type:** `number`  
+**Range:** `0.0` to `1.0`  
+**Default:** `0.1` to `0.2`
+
+Dropout rate for regularization. Increase if overfitting.
+
+## Examples
+
+### Custom Small Model
+```javascript
+model: {
+  type: 'gpt',
+  size: 'custom',
+  layers: 8,
+  heads: 8,
+  dim: 512,
+  vocab_size: 20000,
+  max_length: 1024,
+  dropout: 0.15,
+}
+```
+
+### Memory-Optimized
+```javascript
+model: {
+  size: 'tiny',
+  max_length: 256,  // Reduce for less memory
+  dropout: 0.3,     // Increase to prevent overfitting
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training Config" icon="graduation-cap" href="/config/training">
+    Configure training
+  </Card>
+  <Card title="Templates" icon="layer-group" href="/templates/overview">
+    Choose a template
+  </Card>
+</CardGroup>

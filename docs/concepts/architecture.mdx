@@ -1,0 +1,172 @@
+---
+title: 'Architecture'
+description: 'Understanding the GPT architecture used in create-llm'
+---
+
+## Overview
+
+create-llm uses the GPT (Generative Pre-trained Transformer) architecture, a decoder-only transformer model designed for autoregressive text generation.
+
+## Model Components
+
+<CardGroup cols={2}>
+  <Card title="Token Embedding" icon="text">
+    Converts tokens to dense vectors
+  </Card>
+  <Card title="Position Embedding" icon="location-dot">
+    Encodes position information
+  </Card>
+  <Card title="Transformer Blocks" icon="layer-group">
+    Self-attention and feed-forward layers
+  </Card>
+  <Card title="Output Head" icon="arrow-right">
+    Predicts next token probabilities
+  </Card>
+</CardGroup>
+
+## Architecture Diagram
+
+```
+Input Tokens
+    ↓
+Token Embedding + Position Embedding
+    ↓
+Transformer Block 1
+    ├─ Multi-Head Self-Attention
+    ├─ Layer Normalization
+    ├─ Feed-Forward Network
+    └─ Layer Normalization
+    ↓
+Transformer Block 2
+    ↓
+    ...
+    ↓
+Transformer Block N
+    ↓
+Output Projection
+    ↓
+Next Token Probabilities
+```
+
+## Transformer Block Details
+
+Each transformer block contains:
+
+### 1. Multi-Head Self-Attention
+
+```python
+# Attention mechanism
+Q = input @ W_q  # Query
+K = input @ W_k  # Key
+V = input @ W_v  # Value
+
+attention_scores = softmax(Q @ K.T / sqrt(d_k))
+output = attention_scores @ V
+```
+
+**Purpose:** Allows the model to focus on relevant parts of the input sequence.
+
+### 2. Feed-Forward Network
+
+```python
+# Two-layer MLP
+hidden = relu(input @ W1 + b1)
+output = hidden @ W2 + b2
+```
+
+**Purpose:** Processes information from attention layer.
+
+### 3. Layer Normalization
+
+```python
+normalized = (input - mean) / sqrt(variance + epsilon)
+output = normalized * gamma + beta
+```
+
+**Purpose:** Stabilizes training and improves convergence.
+
+### 4. Residual Connections
+
+```python
+output = input + sublayer(input)
+```
+
+**Purpose:** Enables training of deep networks.
+
+## Model Sizes
+
+| Template | Layers | Heads | Dimension | Parameters |
+|----------|--------|-------|-----------|------------|
+| NANO | 3 | 4 | 128 | ~1M |
+| TINY | 4 | 4 | 256 | ~6M |
+| SMALL | 12 | 12 | 768 | ~100M |
+| BASE | 24 | 16 | 1024 | ~1B |
+
+## Key Hyperparameters
+
+<AccordionGroup>
+  <Accordion title="Number of Layers">
+    More layers = deeper understanding but slower training
+    - NANO: 3 layers (fast, basic)
+    - BASE: 24 layers (slow, sophisticated)
+  </Accordion>
+
+  <Accordion title="Attention Heads">
+    Multiple heads allow attending to different aspects
+    - More heads = richer representations
+    - Must divide evenly into dimension
+  </Accordion>
+
+  <Accordion title="Model Dimension">
+    Size of internal representations
+    - Larger = more capacity but more memory
+    - Typical: 128, 256, 768, 1024
+  </Accordion>
+
+  <Accordion title="Vocabulary Size">
+    Number of unique tokens
+    - Smaller = faster but less expressive
+    - Larger = slower but more nuanced
+  </Accordion>
+</AccordionGroup>
+
+## Autoregressive Generation
+
+The model generates text one token at a time:
+
+```python
+# Generation loop
+tokens = [start_token]
+for _ in range(max_length):
+    # Predict next token
+    logits = model(tokens)
+    next_token = sample(logits[-1])
+    tokens.append(next_token)
+    
+    if next_token == end_token:
+        break
+```
+
+## Causal Masking
+
+GPT uses causal (triangular) attention masks to prevent looking ahead:
+
+```
+Token 1: can see [1]
+Token 2: can see [1, 2]
+Token 3: can see [1, 2, 3]
+Token 4: can see [1, 2, 3, 4]
+```
+
+This ensures the model only uses past context for predictions.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Training" icon="graduation-cap" href="/concepts/training">
+    Learn how models are trained
+  </Card>
+  <Card title="Tokenizers" icon="text" href="/concepts/tokenizers">
+    Understand text tokenization
+  </Card>
+</CardGroup>

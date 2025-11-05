@@ -1,0 +1,126 @@
+---
+title: 'Debugging'
+description: 'Debug training and model issues'
+---
+
+## Debugging Tools
+
+<CardGroup cols={2}>
+  <Card title="TensorBoard" icon="chart-line">
+    Visualize training metrics
+  </Card>
+  <Card title="Logging" icon="file-text">
+    Detailed training logs
+  </Card>
+  <Card title="Profiler" icon="gauge">
+    Find performance bottlenecks
+  </Card>
+  <Card title="Checkpoints" icon="floppy-disk">
+    Inspect model state
+  </Card>
+</CardGroup>
+
+## Enable Debug Mode
+
+```bash
+# Verbose logging
+python training/train.py --verbose
+
+# Debug mode
+python training/train.py --debug
+```
+
+## Check Data Loading
+
+```python
+# Verify data
+python data/verify.py
+
+# Inspect batch
+python -c "
+from data import LLMDataset
+dataset = LLMDataset('data/processed/train.pt')
+print(dataset[0])
+"
+```
+
+## Monitor Training
+
+### TensorBoard
+```bash
+tensorboard --logdir=logs/tensorboard
+```
+
+### Console Logs
+```bash
+tail -f logs/training.log
+```
+
+## Profile Performance
+
+```bash
+# PyTorch profiler
+python -m torch.utils.bottleneck training/train.py
+
+# Line profiler
+kernprof -l training/train.py
+python -m line_profiler train.py.lprof
+```
+
+## Inspect Model
+
+```python
+# Load checkpoint
+import torch
+checkpoint = torch.load('checkpoints/checkpoint-1000.pt')
+
+# Check weights
+print(checkpoint['model_state_dict'].keys())
+
+# Check optimizer state
+print(checkpoint['optimizer_state_dict'])
+```
+
+## Common Debug Scenarios
+
+<AccordionGroup>
+  <Accordion title="NaN Loss">
+    ```python
+    # Add gradient checking
+    torch.autograd.set_detect_anomaly(True)
+    
+    # Check for NaN in data
+    assert not torch.isnan(batch).any()
+    ```
+  </Accordion>
+
+  <Accordion title="Memory Leak">
+    ```python
+    # Track memory
+    import tracemalloc
+    tracemalloc.start()
+    
+    # After training step
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    ```
+  </Accordion>
+
+  <Accordion title="Slow Training">
+    ```bash
+    # Profile with py-spy
+    py-spy record -o profile.svg -- python training/train.py
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Common Issues" icon="circle-exclamation" href="/troubleshooting/common-issues">
+    Fix common problems
+  </Card>
+  <Card title="Performance" icon="gauge" href="/troubleshooting/performance">
+    Optimize speed
+  </Card>
+</CardGroup>

@@ -1,0 +1,125 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "create-llm",
+    "colors": {
+        "primary": "#0D9373",
+        "light": "#07C983",
+        "dark": "#0D9373",
+        "anchors": {
+            "from": "#0D9373",
+            "to": "#07C983"
+        }
+    },
+    "topbarLinks": [
+        {
+            "name": "Support",
+            "url": "mailto:theaniketgiri@gmail.com"
+        }
+    ],
+    "topbarCtaButton": {
+        "name": "GitHub",
+        "url": "https://github.com/theaniketgiri/create-llm"
+    },
+    "tabs": [
+        {
+            "name": "API Reference",
+            "url": "api-reference"
+        },
+        {
+            "name": "Examples",
+            "url": "examples"
+        }
+    ],
+    "anchors": [
+        {
+            "name": "npm Package",
+            "icon": "npm",
+            "url": "https://www.npmjs.com/package/@theanikrtgiri/create-llm"
+        },
+        {
+            "name": "Community",
+            "icon": "github",
+            "url": "https://github.com/theaniketgiri/create-llm/discussions"
+        },
+        {
+            "name": "Blog",
+            "icon": "newspaper",
+            "url": "https://github.com/theaniketgiri/create-llm/blog"
+        }
+    ],
+    "navigation": [
+        {
+            "group": "Get Started",
+            "pages": [
+                "introduction",
+                "quickstart",
+                "installation"
+            ]
+        },
+        {
+            "group": "Templates",
+            "pages": [
+                "templates/overview",
+                "templates/nano",
+                "templates/tiny",
+                "templates/small",
+                "templates/base"
+            ]
+        },
+        {
+            "group": "Core Concepts",
+            "pages": [
+                "concepts/architecture",
+                "concepts/tokenizers",
+                "concepts/training",
+                "concepts/evaluation"
+            ]
+        },
+        {
+            "group": "Guides",
+            "pages": [
+                "guides/data-preparation",
+                "guides/training-tips",
+                "guides/deployment",
+                "guides/docker"
+            ]
+        },
+        {
+            "group": "Configuration",
+            "pages": [
+                "config/overview",
+                "config/model",
+                "config/training",
+                "config/data"
+            ]
+        },
+        {
+            "group": "API Reference",
+            "pages": [
+                "api-reference/cli",
+                "api-reference/trainer",
+                "api-reference/callbacks"
+            ]
+        },
+        {
+            "group": "Examples",
+            "pages": [
+                "examples/shakespeare",
+                "examples/code-generation",
+                "examples/chatbot"
+            ]
+        },
+        {
+            "group": "Troubleshooting",
+            "pages": [
+                "troubleshooting/common-issues",
+                "troubleshooting/performance",
+                "troubleshooting/debugging"
+            ]
+        }
+    ],
+    "footerSocials": {
+        "github": "https://github.com/theaniketgiri/create-llm",
+        "twitter": "https://twitter.com/theaniketgiri"
+    }
+}

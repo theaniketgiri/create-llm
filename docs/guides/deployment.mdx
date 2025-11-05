@@ -1,0 +1,174 @@
+---
+title: 'Deployment'
+description: 'Deploy your trained model to production'
+---
+
+## Deployment Options
+
+<CardGroup cols={3}>
+  <Card title="HuggingFace Hub" icon="face-smile">
+    Share and host models
+  </Card>
+  <Card title="Docker" icon="docker">
+    Containerized deployment
+  </Card>
+  <Card title="API Server" icon="server">
+    REST API endpoint
+  </Card>
+</CardGroup>
+
+## HuggingFace Hub
+
+Deploy to HuggingFace for easy sharing:
+
+```bash
+python deploy.py \
+  --to huggingface \
+  --repo-id username/my-model \
+  --checkpoint checkpoints/checkpoint-best.pt
+```
+
+Then use it:
+```python
+from transformers import AutoModel
+
+model = AutoModel.from_pretrained("username/my-model")
+```
+
+## Docker Deployment
+
+### Build Image
+
+```bash
+# Build Docker image
+docker build -t my-llm:latest .
+
+# Run container
+docker run -p 8000:8000 my-llm:latest
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  llm-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_PATH=/models/checkpoint-best.pt
+    volumes:
+      - ./checkpoints:/models
+```
+
+## API Server
+
+Create a REST API:
+
+```python
+# api.py
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class GenerateRequest(BaseModel):
+    prompt: str
+    max_length: int = 100
+    temperature: float = 0.8
+
+@app.post("/generate")
+def generate(request: GenerateRequest):
+    output = model.generate(
+        request.prompt,
+        max_length=request.max_length,
+        temperature=request.temperature
+    )
+    return {"text": output}
+```
+
+Run server:
+```bash
+uvicorn api:app --host 0.0.0.0 --port 8000
+```
+
+## Cloud Deployment
+
+### AWS
+
+```bash
+# Deploy to AWS Lambda
+serverless deploy
+
+# Or EC2
+aws ec2 run-instances --image-id ami-xxx
+```
+
+### Google Cloud
+
+```bash
+# Deploy to Cloud Run
+gcloud run deploy my-llm --image gcr.io/project/my-llm
+```
+
+### Azure
+
+```bash
+# Deploy to Azure Container Instances
+az container create --resource-group mygroup --name my-llm
+```
+
+## Optimization for Production
+
+<AccordionGroup>
+  <Accordion title="Model Quantization">
+    Reduce model size:
+    ```python
+    # INT8 quantization
+    quantized_model = torch.quantization.quantize_dynamic(
+        model, {torch.nn.Linear}, dtype=torch.qint8
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="ONNX Export">
+    Export for faster inference:
+    ```python
+    torch.onnx.export(model, dummy_input, "model.onnx")
+    ```
+  </Accordion>
+
+  <Accordion title="Batch Inference">
+    Process multiple requests together:
+    ```python
+    outputs = model.generate_batch(prompts, batch_size=32)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Monitoring
+
+Track production metrics:
+
+```python
+# Log requests
+logger.info(f"Request: {prompt}, Latency: {latency}ms")
+
+# Monitor errors
+sentry.capture_exception(error)
+
+# Track usage
+prometheus.counter('requests_total').inc()
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Docker Guide" icon="docker" href="/guides/docker">
+    Detailed Docker setup
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/cli">
+    API documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,184 @@
+---
+title: 'Training Tips'
+description: 'Advanced tips and tricks for training better models'
+---
+
+## Optimization Strategies
+
+<CardGroup cols={2}>
+  <Card title="Learning Rate" icon="gauge">
+    Most important hyperparameter
+  </Card>
+  <Card title="Batch Size" icon="layer-group">
+    Balance speed and stability
+  </Card>
+  <Card title="Mixed Precision" icon="bolt">
+    2x faster training on GPU
+  </Card>
+  <Card title="Gradient Accumulation" icon="arrows-up-to-line">
+    Simulate larger batches
+  </Card>
+</CardGroup>
+
+## Learning Rate Tuning
+
+Find optimal learning rate:
+
+```bash
+# Run learning rate finder
+python training/find_lr.py
+```
+
+**Guidelines:**
+- Start with template defaults
+- If loss doesn't decrease: reduce by 10x
+- If loss explodes: reduce by 100x
+- If training is slow: increase by 2x
+
+## Preventing Overfitting
+
+<AccordionGroup>
+  <Accordion title="Add More Data">
+    Best solution - collect more training examples
+  </Accordion>
+
+  <Accordion title="Increase Dropout">
+    ```javascript
+    dropout: 0.2  // Increase to 0.3 or 0.4
+    ```
+  </Accordion>
+
+  <Accordion title="Use Smaller Model">
+    Switch to smaller template if data is limited
+  </Accordion>
+
+  <Accordion title="Early Stopping">
+    Stop when validation loss stops improving
+  </Accordion>
+
+  <Accordion title="Data Augmentation">
+    Paraphrase, back-translate, or synthesize data
+  </Accordion>
+</AccordionGroup>
+
+## Speed Optimization
+
+### GPU Optimization
+```javascript
+{
+  mixed_precision: true,  // Enable FP16
+  batch_size: 32,         // Maximize GPU usage
+  num_workers: 4,         // Parallel data loading
+  pin_memory: true,       // Faster GPU transfer
+}
+```
+
+### CPU Optimization
+```javascript
+{
+  batch_size: 8,          // Smaller for CPU
+  num_workers: 0,         // Avoid multiprocessing overhead
+  gradient_accumulation_steps: 4,  // Simulate larger batch
+}
+```
+
+## Memory Optimization
+
+<Steps>
+  <Step title="Reduce Batch Size">
+    ```javascript
+    batch_size: 16  // or 8, or 4
+    ```
+  </Step>
+
+  <Step title="Enable Mixed Precision">
+    ```javascript
+    mixed_precision: true
+    ```
+  </Step>
+
+  <Step title="Gradient Accumulation">
+    ```javascript
+    gradient_accumulation_steps: 4
+    ```
+  </Step>
+
+  <Step title="Reduce Sequence Length">
+    ```javascript
+    max_length: 512  // or 256
+    ```
+  </Step>
+</Steps>
+
+## Monitoring Training
+
+Watch these metrics:
+
+- **Training Loss**: Should decrease steadily
+- **Validation Loss**: Should track training loss
+- **Perplexity**: Should decrease
+- **GPU Utilization**: Should be >80%
+- **Tokens/sec**: Higher is better
+
+## Checkpoint Strategy
+
+```javascript
+{
+  save_interval: 5000,      // Save every 5000 steps
+  save_total_limit: 3,      // Keep only 3 checkpoints
+  save_best: true,          // Save best validation loss
+}
+```
+
+## Debugging Training
+
+<AccordionGroup>
+  <Accordion title="Loss Not Decreasing">
+    1. Check learning rate (try 1e-4)
+    2. Verify data loading
+    3. Check for NaN values
+    4. Increase warmup steps
+  </Accordion>
+
+  <Accordion title="Loss Exploding">
+    1. Reduce learning rate
+    2. Enable gradient clipping
+    3. Check data for outliers
+    4. Increase warmup period
+  </Accordion>
+
+  <Accordion title="Slow Training">
+    1. Enable mixed precision
+    2. Increase batch size
+    3. Check GPU utilization
+    4. Optimize data loading
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Techniques
+
+### Gradient Clipping
+```javascript
+gradient_clip: 1.0  // Prevent exploding gradients
+```
+
+### Weight Decay
+```javascript
+weight_decay: 0.01  // L2 regularization
+```
+
+### Learning Rate Scheduling
+```javascript
+lr_scheduler: 'cosine'  // Cosine annealing
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Evaluation" icon="chart-bar" href="/concepts/evaluation">
+    Evaluate your model
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/troubleshooting/common-issues">
+    Fix common issues
+  </Card>
+</CardGroup>

@@ -1,0 +1,180 @@
+---
+title: 'NANO Template'
+description: '1M parameter model - Perfect for learning and quick experiments'
+---
+
+## Overview
+
+The NANO template is the smallest model in create-llm, designed specifically for learning and rapid experimentation.
+
+<CardGroup cols={2}>
+  <Card title="Parameters" icon="hashtag">
+    ~1 Million
+  </Card>
+  <Card title="Training Time" icon="clock">
+    1-2 minutes on any CPU
+  </Card>
+  <Card title="Hardware" icon="microchip">
+    Any laptop (2GB RAM)
+  </Card>
+  <Card title="Data Needed" icon="database">
+    100+ examples minimum
+  </Card>
+</CardGroup>
+
+## When to Use NANO
+
+<Check>**Perfect for:**</Check>
+
+- First time training an LLM
+- Learning the training pipeline
+- Quick experiments and testing
+- Educational purposes and demos
+- Limited data (100-1000 examples)
+- CPU-only environments
+
+<Warning>**Not suitable for:**</Warning>
+
+- Production applications
+- Complex language understanding
+- Large-scale deployments
+
+## Model Architecture
+
+```python
+{
+  "layers": 3,
+  "heads": 4,
+  "dim": 128,
+  "vocab_size": 5000,
+  "max_length": 256,
+  "dropout": 0.1
+}
+```
+
+**Total Parameters:** ~681,856
+
+## Create NANO Project
+
+```bash
+npx create-llm my-nano-llm --template nano --tokenizer bpe
+cd my-nano-llm
+pip install -r requirements.txt
+```
+
+## Training Configuration
+
+Default `llm.config.js` settings:
+
+```javascript
+module.exports = {
+  model: {
+    type: 'gpt',
+    size: 'nano',
+    vocab_size: 5000,
+    max_length: 256,
+    layers: 3,
+    heads: 4,
+    dim: 128,
+    dropout: 0.1,
+  },
+  
+  training: {
+    batch_size: 8,
+    learning_rate: 0.0005,
+    warmup_steps: 100,
+    max_steps: 1000,
+    eval_interval: 200,
+    save_interval: 500,
+  },
+};
+```
+
+## Example: Shakespeare Training
+
+<Steps>
+  <Step title="Download Data">
+    ```bash
+    curl https://www.gutenberg.org/files/100/100-0.txt > data/raw/shakespeare.txt
+    ```
+  </Step>
+
+  <Step title="Train Tokenizer">
+    ```bash
+    python tokenizer/train.py --data data/raw/
+    ```
+  </Step>
+
+  <Step title="Prepare Dataset">
+    ```bash
+    python data/prepare.py
+    ```
+  </Step>
+
+  <Step title="Train Model">
+    ```bash
+    python training/train.py
+    ```
+    Training completes in ~2 minutes on CPU
+  </Step>
+
+  <Step title="Generate Text">
+    ```bash
+    python evaluation/generate.py \
+      --checkpoint checkpoints/checkpoint-best.pt \
+      --prompt "To be or not to be"
+    ```
+  </Step>
+</Steps>
+
+## Performance Expectations
+
+<Info>
+  NANO is designed for learning, not production use
+</Info>
+
+**What to expect:**
+- Basic text generation
+- Simple pattern recognition
+- Limited coherence over long sequences
+- Good for understanding training mechanics
+
+**Typical metrics:**
+- Training loss: 2.0-3.0
+- Perplexity: 7-20
+- Generation quality: Basic but functional
+
+## Tips for NANO
+
+<AccordionGroup>
+  <Accordion title="Avoid Overfitting">
+    - Use at least 100 examples
+    - Monitor validation loss
+    - Stop if perplexity < 1.5
+  </Accordion>
+
+  <Accordion title="Optimize Training">
+    - Reduce batch_size if OOM
+    - Increase max_steps for better quality
+    - Use smaller vocab_size (2000-5000)
+  </Accordion>
+
+  <Accordion title="Data Preparation">
+    - Clean your text data
+    - Remove special characters
+    - Keep sequences under 256 tokens
+  </Accordion>
+</AccordionGroup>
+
+## Upgrade Path
+
+Once you've mastered NANO, upgrade to:
+
+<CardGroup cols={2}>
+  <Card title="TINY Template" icon="cube" href="/templates/tiny">
+    6M parameters for better quality
+  </Card>
+  <Card title="Training Tips" icon="lightbulb" href="/guides/training-tips">
+    Learn advanced techniques
+  </Card>
+</CardGroup>
