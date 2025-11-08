@@ -60,8 +60,7 @@ Everything you need out of the box:
 - Data preprocessing pipeline
 - Tokenizer training (BPE, WordPiece, Unigram)
 - Checkpoint management with auto-save
-- TensorBoard integration
-- Live training dashboard
+- TensorBoard integration for real-time monitoring
 - Interactive chat interface
 - Model comparison tools
 - Deployment scripts
@@ -301,9 +300,11 @@ This tokenizes and prepares your data for training.
 # Basic training
 python training/train.py
 
-# With live dashboard
-python training/train.py --dashboard
-# Then open http://localhost:5000
+# With TensorBoard monitoring
+python training/train.py
+# In another terminal:
+tensorboard --logdir=logs/tensorboard
+# Then open http://localhost:6006
 
 # Resume from checkpoint
 python training/train.py --resume checkpoints/checkpoint-1000.pt
@@ -369,8 +370,7 @@ my-llm/
 ├── training/
 │   ├── train.py         # Main training script
 │   ├── trainer.py       # Trainer class
-│   ├── callbacks/       # Training callbacks
-│   └── dashboard/       # Live training dashboard
+│   └── callbacks/       # Training callbacks
 │
 ├── evaluation/
 │   ├── evaluate.py      # Model evaluation
@@ -494,7 +494,7 @@ npx create-llm my-project -y
 - Start with NANO to test pipeline
 - Use mixed precision on GPU (`mixed_precision: true`)
 - Increase `gradient_accumulation_steps` if OOM
-- Monitor GPU usage with dashboard
+- Monitor training with TensorBoard
 - Save checkpoints frequently
 
 ---
