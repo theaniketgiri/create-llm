@@ -1674,7 +1674,7 @@ Web-based chat interface for interacting with trained model
 import sys
 import torch
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -1807,18 +1807,18 @@ class ChatInterface:
     def generate_response(
         self,
         message: str,
-        history: List[Tuple[str, str]],
+        history: List[Dict[str, str]],
         temperature: float,
         top_k: int,
         top_p: float,
         max_length: int
-    ) -> Tuple[str, List[Tuple[str, str]]]:
+    ) -> Tuple[str, List[Dict[str, str]]]:
         """
         Generate response for user message
         
         Args:
             message: User's message
-            history: Conversation history (list of [user_msg, bot_msg] pairs)
+            history: Conversation history, Gradio messages format ([{"role", "content"}, ...])
             temperature: Sampling temperature
             top_k: Top-k sampling
             top_p: Nucleus sampling
@@ -1831,12 +1831,14 @@ class ChatInterface:
             return "", history
         
         try:
-            # Build context from history
+            # Build context from history (Gradio messages format)
             context_parts = []
-            for user_msg, bot_msg in history[-5:]:  # Keep last 5 turns
-                context_parts.append(f"User: {user_msg}")
-                if bot_msg:
-                    context_parts.append(f"Assistant: {bot_msg}")
+            for turn in history[-10:]:  # Keep last 5 turns
+                content = turn.get("content") or ""
+                if not content:
+                    continue
+                role = "Assistant" if turn.get("role") == "assistant" else "User"
+                context_parts.append(f"{role}: {content}")
             
             # Add current message
             context_parts.append(f"User: {message}")
@@ -1881,14 +1883,20 @@ class ChatInterface:
                 response = "I'm not sure how to respond to that."
             
             # Update history
-            history.append((message, response))
+            history = history + [
+                {"role": "user", "content": message},
+                {"role": "assistant", "content": response},
+            ]
             
             return "", history
             
         except Exception as e:
             error_msg = f"Error generating response: {str(e)}"
             print(error_msg)
-            history.append((message, f"ERROR: {error_msg}"))
+            history = history + [
+                {"role": "user", "content": message},
+                {"role": "assistant", "content": f"ERROR: {error_msg}"},
+            ]
             return "", history
     
     def _generate(
@@ -2008,15 +2016,15 @@ class ChatInterface:
         }
         """
         
-        with gr.Blocks(
-            title="Chat with Your Model",
-            theme=gr.themes.Soft(
-                primary_hue="green",
-                secondary_hue="blue",
-                neutral_hue="slate",
-            ),
-            css=custom_css
-        ) as interface:
+        # Gradio 6: theme and css moved from Blocks() to launch()
+        self.theme = gr.themes.Soft(
+            primary_hue="green",
+            secondary_hue="blue",
+            neutral_hue="slate",
+        )
+        self.custom_css = custom_css
+
+        with gr.Blocks(title="Chat with Your Model") as interface:
             
             # Greeting section (shown when no conversation)
             with gr.Column(elem_id="greeting-box"):
@@ -2068,11 +2076,8 @@ class ChatInterface:
             chatbot = gr.Chatbot(
                 label="",
                 height=450,
-                show_copy_button=True,
-                type="tuples",
                 elem_id="chatbot",
                 avatar_images=(None, "🤖"),
-                bubble_full_width=False
             )
             
             # Input area
@@ -2163,7 +2168,7 @@ class ChatInterface:
                 outputs=[msg, chatbot]
             )
             
-            clear.click(lambda: None, None, chatbot, queue=False)
+            clear.click(lambda: [], None, chatbot, queue=False)
         
         return interface
     
@@ -2189,7 +2194,9 @@ class ChatInterface:
                 server_name="127.0.0.1",
                 server_port=server_port,
                 share=share,
-                show_error=True
+                show_error=True,
+                theme=self.theme,
+                css=self.custom_css,
             )
         except OSError as e:
             if "address already in use" in str(e).lower():
@@ -2198,7 +2205,9 @@ class ChatInterface:
                     server_name="127.0.0.1",
                     server_port=server_port + 1,
                     share=share,
-                    show_error=True
+                    show_error=True,
+                    theme=self.theme,
+                    css=self.custom_css,
                 )
             else:
                 raise
@@ -3168,7 +3177,7 @@ if __name__ == '__main__':
         lines.push('matplotlib>=3.7.0');
         lines.push('');
         lines.push('# Interactive chat interface');
-        lines.push('gradio>=4.0.0');
+        lines.push('gradio>=6.0.0');
         lines.push('');
 
         // Add plugin-specific dependencies
