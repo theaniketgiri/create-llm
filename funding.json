@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "owner",
+    "name": "Aniket Giri",
+    "email": "theaniketgiri@gmail.com",
+    "description": "I'm a final-year Computer Science student at the University of Mumbai, based in Mumbai. I build open developer tools in public. I created and maintain create-llm, and I have also contributed merged patches to Microsoft Playwright and Graphite Editor.",
+    "webpageUrl": {
+      "url": "https://github.com/theaniketgiri"
+    }
+  },
+  "projects": [
+    {
+      "guid": "create-llm",
+      "name": "create-llm",
+      "description": "create-llm is a CLI that scaffolds a ready-to-train PyTorch language-model project in one command, the way create-next-app scaffolds a web app. I built it in 2025 as a third-year CS student, after spending a night going through tutorials that assumed a research lab and a pile of GPUs I did not have. It ships four templates (nano, tiny, small, base), tokenizer training, a training loop with overfitting warnings, and a local chat interface. I posted it on Hacker News on 26 Oct 2025. As of 26 Nov 2026 it has 374 GitHub stars, 49 forks, and about 10,216 npm downloads since launch (https://www.npmjs.com/package/create-llm). It is MIT licensed. I still maintain it while building my company, and this grant would let me treat maintenance as real work rather than leftover hours.",
+      "webpageUrl": {
+        "url": "https://github.com/theaniketgiri/create-llm"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/theaniketgiri/create-llm"
+      },
+      "licenses": [
+        "spdx:MIT"
+      ],
+      "tags": [
+        "developer-tools",
+        "machine-learning",
+        "python",
+        "pytorch",
+        "cli",
+        "llm"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "inr-bank",
+        "type": "bank",
+        "address": "INR bank transfer, details on request",
+        "description": "Payment to Aniket Giri in India, in INR. Bank account details will be shared privately after approval."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "create-llm-2027-maintenance",
+        "status": "active",
+        "name": "A year of create-llm maintenance and hardening",
+        "description": "One-time FOSS United grant of Rs 3 lakh for 12 months of create-llm maintenance, plus modest GPU and npm/CI costs. Milestones: by month 3, stop embedding Python templates as strings in the TypeScript CLI; by month 6, scaffolding tests and a CPU smoke-test of the nano and tiny templates; by month 9, better docs for the chat UI and overfitting warnings; by month 12, a BERT or T5 template, or a decision those belong in a plugin. At least one public update a quarter. This is a maintainer stipend.",
+        "amount": 300000,
+        "currency": "INR",
+        "frequency": "one-time",
+        "channels": [
+          "inr-bank"
+        ]
+      }
+    ]
+  }
+}
